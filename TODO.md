@@ -46,7 +46,7 @@
 
 **Goal:** a system that can snapshot, mutate (Dock/Menu Bar only), and *always* restore — through every exit path — before any UI exists.
 
-- [ ] **P1.1 Project scaffolding**
+- [x] **P1.1 Project scaffolding**
   **Files:** `Package.swift`, `Makefile`, `.gitignore`, `README.md`, `scripts/doctor.sh`, `Sources/PersonaCore/PersonaCore.swift`, `Sources/PersonaMode/main.swift`, `Sources/PersonaSelfTest/main.swift`, directory skeleton from §10 (empty dirs with `.gitkeep`).
   **Details:**
   - `Package.swift`: tools-version `6.0`; `platforms: [.macOS(.v14)]`; `let swift5: [SwiftSetting] = [.swiftLanguageMode(.v5)]`; targets: `.target(name:"PersonaCore")`, `.executableTarget(name:"PersonaMode", dependencies:["PersonaCore"])`, `.executableTarget(name:"PersonaSelfTest", dependencies:["PersonaCore"])`, all with `swiftSettings: swift5`. Products: executables `PersonaMode` and `persona-selftest` (→ target `PersonaSelfTest`). **No `resources:`** (ADR-3).
