@@ -1,0 +1,62 @@
+{
+  "active" : true,
+  "appPid" : 12345,
+  "createdAt" : "2026-10-26T06:00:00Z",
+  "ledger" : {
+    "entries" : [
+      {
+        "id" : "MUT-1",
+        "mutation" : {
+          "dockAutohide" : {
+            "_0" : true
+          }
+        },
+        "status" : "applied",
+        "ts" : "2026-10-26T06:00:01Z"
+      },
+      {
+        "id" : "MUT-2",
+        "mutation" : {
+          "tempDir" : {
+            "path" : "/tmp/PersonaMode/profiles"
+          }
+        },
+        "status" : "applied",
+        "ts" : "2026-10-26T06:00:02Z"
+      }
+    ]
+  },
+  "macOS" : "26.6.2",
+  "phase" : "active",
+  "schemaVersion" : 1,
+  "sessionId" : "TEST-SESSION-RECOVERY",
+  "snapshot" : {
+    "dock" : {
+      "autohide" : {
+        "present" : false
+      }
+    },
+    "menuBar" : {
+      "hideMenuBar" : {
+        "present" : false
+      },
+      "mechanism" : "systemEvents",
+      "scriptedAutohide" : false,
+      "visibleInFullscreen" : {
+        "present" : false
+      }
+    },
+    "wallpapers" : [
+      {
+        "displayUUID" : "UUID-TEST-DISP",
+        "isRestorable" : true,
+        "name" : "Main Display",
+        "options" : {
+
+        },
+        "url" : "file:///System/Library/Desktop%20Pictures/Solid%20Colors/Black.png"
+      }
+    ]
+  },
+  "wallpaperMode" : "overlay"
+}

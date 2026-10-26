@@ -103,7 +103,7 @@
   ```
   (First run may show a macOS Automation prompt for System Events → Allow.)
 
-- [ ] **P1.6 `scripts/restore_macos.sh` v1 + script tests**
+- [x] **P1.6 `scripts/restore_macos.sh` v1 + script tests**
   **Files:** `scripts/restore_macos.sh`, `scripts/test_restore_script.sh`, `scripts/fixtures/state_hidden.json`, `scripts/fixtures/state_corrupt.json`.
   **Details:** implement per §9.8: flags `--dry-run --force-defaults --kill-app --reason <s> --support-dir <p>`; `PERSONA_SUPPORT_DIR` honored; `mkdir`-mutex `restore.lock.d` (stale-mutex cleanup after 30 s); JSON via `plutil -extract … raw`; bash 3.2 only; `run()` helper that prints and (unless `--dry-run`) executes each command. Dock: if original present → `osascript … set autohide of dock preferences to <orig>`; if absent → set `false` then `defaults delete com.apple.dock autohide`; fallback (osascript failure) `defaults write/delete` + `killall Dock`. Menu bar per spike result placeholder: scripted set to original, then reconcile raw keys (`defaults delete NSGlobalDomain _HIHideMenuBar` etc.). Wallpaper via JXA only if `wallpaperMode == system`. Safe temp-path deletion with prefix guard. Missing/corrupt state ⇒ force-defaults branch. Always remove lock files last. Exit codes `0/2/3`.
   `test_restore_script.sh`: runs the script with `--dry-run` against fixtures in temp support dirs and asserts (with `grep -q`) the exact commands emitted; asserts missing-state path emits `autohide … false`; asserts a malicious `tempdir` path (`/Users`) is **refused**; runs the script under `/bin/bash` explicitly.
