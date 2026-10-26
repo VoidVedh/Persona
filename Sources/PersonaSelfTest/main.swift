@@ -2,7 +2,8 @@ import Foundation
 import PersonaCore
 
 let suites: [(name: String, run: (Harness) -> Void)] = [
-    ("harness", HarnessSuite.run)
+    ("harness", HarnessSuite.run),
+    ("config", ConfigSuite.run)
 ]
 
 let harness = Harness()

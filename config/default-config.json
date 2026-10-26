@@ -1,0 +1,63 @@
+{
+  "wallpaper": {
+    "mode": "overlay"
+  },
+  "topBar": {
+    "height": 34,
+    "marginTop": 6,
+    "marginSide": 10,
+    "level": "mainMenuMinusOne"
+  },
+  "hud": {
+    "primaryScreenOnly": true,
+    "ambientAnimation": true,
+    "fps": 30
+  },
+  "tiling": {
+    "enabled": true,
+    "algorithm": "dwindle",
+    "splitRatio": 0.5,
+    "gaps": {
+      "outer": 12,
+      "inner": 10
+    },
+    "snapBackOnDrag": true,
+    "floatApps": [
+      "com.apple.systempreferences",
+      "com.apple.calculator",
+      "dev.persona.mode"
+    ]
+  },
+  "border": {
+    "enabled": true,
+    "width": 3,
+    "cornerRadius": 16,
+    "color": "#00d8ff",
+    "pulse": true
+  },
+  "terminal": {
+    "preference": [
+      "ghostty",
+      "kitty",
+      "wezterm",
+      "alacritty",
+      "terminal"
+    ]
+  },
+  "hotkeys": {
+    "launcher": "opt+space",
+    "tile": "ctrl+opt+t",
+    "toggleFloat": "ctrl+opt+f",
+    "terminal": "ctrl+opt+return",
+    "panic": "ctrl+opt+cmd+q",
+    "space1": "ctrl+opt+1",
+    "space2": "ctrl+opt+2",
+    "space3": "ctrl+opt+3",
+    "space4": "ctrl+opt+4",
+    "space5": "ctrl+opt+5"
+  },
+  "guardian": {
+    "enabled": true,
+    "hangSeconds": 15
+  }
+}
