@@ -61,7 +61,7 @@
   ```
   Expected: build complete; `PersonaMode 0.1.0`; selftest prints `0 suites` and exits 0; doctor prints facts and exits 0.
 
-- [ ] **P1.2 Self-test harness**
+- [x] **P1.2 Self-test harness**
   **Files:** `Sources/PersonaSelfTest/Harness.swift`, `Sources/PersonaSelfTest/main.swift`, `Sources/PersonaSelfTest/Suites/HarnessSuite.swift`.
   **Details:** `final class Harness { func suite(_ name: String, _ body: () throws -> Void); func expect(_ cond: @autoclosure () -> Bool, _ msg: String, file: StaticString = #fileID, line: UInt = #line); func expectEqual<T: Equatable>(_ a: T, _ b: T, …); func expectThrows(…) ; var failures: Int }`. `main.swift` registers suites in an ordered array `[(name, run)]`, filters by `CommandLine.arguments.dropFirst()` (no args = all), prints `PASS name/case` or `FAIL name/case: msg (file:line)`, summary `N passed, M failed`, `exit(failures == 0 ? 0 : 1)`. Env `SELFTEST_FORCE_FAIL=1` makes `HarnessSuite` add one failing check (used to test the harness itself).
   **Verify:**
