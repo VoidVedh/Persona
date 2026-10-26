@@ -75,7 +75,7 @@
   **Details:** `public struct AppConfig: Codable, Equatable` mirroring §12 (`wallpaper.mode`, `topBar{height,marginTop,marginSide,level}`, `hud`, `tiling{enabled,algorithm,splitRatio,gaps{outer,inner},snapBackOnDrag,floatApps}`, `border{enabled,width,cornerRadius,color,pulse}`, `terminal.preference`, `hotkeys`, `guardian{enabled,hangSeconds}`). Custom `init(from:)` using `decodeIfPresent` with defaults at every level so partial user JSON merges over defaults. `static func load(userFile: URL?) -> (AppConfig, [String] /*warnings*/)` — invalid JSON ⇒ defaults + warning (never throws). Validation clamps: `border.width ≤ gaps.inner` (warn), `splitRatio ∈ [0.2,0.8]`, hex colors match `^#[0-9a-fA-F]{6}$`. Enums: `WallpaperMode {overlay, system, none}`, `BarLevel {mainMenuMinusOne, statusBar}`, `TilingAlgorithm {dwindle, masterStack}`.
   **Verify:** selftests: defaults decode equals `config/default-config.json` (run from repo root); partial JSON `{"tiling":{"gaps":{"outer":20}}}` keeps `inner` default; garbage JSON ⇒ defaults + 1 warning; clamp tests. `V-TEST config`.
 
-- [ ] **P1.4 State model, atomic store, session lock**
+- [x] **P1.4 State model, atomic store, session lock**
   **Files:** `Sources/PersonaCore/State/{SystemStateSnapshot,StateFile,Mutation,RestoreLedger,StateStore,SessionLock}.swift`, `Sources/PersonaSelfTest/Suites/{StateSuite,LedgerSuite}.swift`.
   **Details (exact types, §9.2, §9.4):**
   - `public struct OriginalValue<T: Codable & Equatable>: Codable, Equatable { var present: Bool; var value: T? }`.
