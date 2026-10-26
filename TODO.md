@@ -87,7 +87,7 @@
   - `RestoreLedger`: `append(.pending)`, `markApplied(id)`, `markRestored(id)`, `pendingOrApplied` accessor.
   **Verify:** selftests — roundtrip equality; `OriginalValue(present:false)` survives; truncated/corrupt `state.json` falls back to `.prev`; no `.tmp` left after save; file mode is `0600`; second `SessionLock` acquire in-process on a fresh fd fails; ledger transitions. `V-TEST state ledger`.
 
-- [ ] **P1.5 Read-only system adapter + `--probe snapshot`**
+- [x] **P1.5 Read-only system adapter + `--probe snapshot`**
   **Files:** `Sources/PersonaCore/Lifecycle/SystemAdapter.swift` (protocol + value types), `Sources/PersonaMode/Lifecycle/ShellRunner.swift`, `Sources/PersonaMode/System/RealSystemAdapter.swift`, `Sources/PersonaMode/Probes/{Probe,ProbeSnapshot}.swift`, `Sources/PersonaMode/main.swift` (arg dispatch).
   **Details:**
   - `protocol SystemAdapter { func readDockAutohide() -> OriginalValue<Bool>; func readMenuBarKeys() -> (hide: OriginalValue<Bool>, fullscreen: OriginalValue<Bool>); func readScripted() -> (dock: Bool?, menuBar: Bool?); func readWallpapers() -> [WallpaperSnapshot]; func setDockAutohide(_ v: Bool) throws; func setMenuBarAutohide(_ v: Bool) throws; func deleteDockAutohideKey() throws; func setMenuBarKeys(…) throws; func setWallpapers(_:) throws; func isStable() -> Bool }` (writers throw `.notImplemented` for now).
