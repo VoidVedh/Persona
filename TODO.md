@@ -125,7 +125,7 @@
   Record observed behavior (use `screencapture -x /tmp/spike_menubar.png` and view it if permitted), chosen mechanism, and any caveats. **Update `restore_macos.sh` and `ARCHITECTURE.md §9.5` to match.** If Menu Bar hiding is *not* achievable live, set `menuBar.mechanism="none"` — the app then does not hide the native menu bar (bar overlaps; level 23 keeps native menus reachable) and snapshot still records the keys.
   **Verify:** `docs/SPIKE_RESULTS.md` contains a "S-1" section with Decision lines; afterwards `defaults read NSGlobalDomain _HIHideMenuBar` and `defaults read com.apple.dock autohide` report the same as the P1.5 snapshot (absent), and `restore_macos.sh --dry-run` output is consistent with the chosen mechanism.
 
-- [ ] **P1.8 System mutator, snapshot service, write adapters (with crash-injection tests)**
+- [x] **P1.8 System mutator, snapshot service, write adapters (with crash-injection tests)**
   **Files:** `Sources/PersonaCore/Lifecycle/{SnapshotService,SystemMutator,RecoveryManager}.swift`, `Sources/PersonaCore/Lifecycle/FakeSystemAdapter.swift` (public, used by selftest + dry run), `Sources/PersonaMode/System/{RealSystemAdapter+Write,DryRunAdapter}.swift`, `Sources/PersonaSelfTest/Suites/MutatorSuite.swift`.
   **Details:**
   - `SnapshotService.begin(store:lock:adapter:mode:) throws -> StateFile`: **I2** — if `store.load()` has `active==true` **or** `SessionLock.isHeldByOther==false` with leftover `session.lock` ⇒ call `RecoveryManager.recoverIfStale` first; then read snapshot via adapter; write `StateFile(active:true, phase:.snapshotted)`; acquire lock. Returns only after durable (I1).

@@ -122,25 +122,6 @@ public final class RealSystemAdapter: SystemAdapter {
         return snapshots
     }
 
-    public func setDockAutohide(_ v: Bool) throws {
-        throw SystemAdapterError.notImplemented
-    }
-
-    public func setMenuBarAutohide(_ v: Bool) throws {
-        throw SystemAdapterError.notImplemented
-    }
-
-    public func deleteDockAutohideKey() throws {
-        throw SystemAdapterError.notImplemented
-    }
-
-    public func setMenuBarKeys(hide: OriginalValue<Bool>, fullscreen: OriginalValue<Bool>) throws {
-        throw SystemAdapterError.notImplemented
-    }
-
-    public func setWallpapers(_ wallpapers: [WallpaperSnapshot]) throws {
-        throw SystemAdapterError.notImplemented
-    }
 
     public func isStable() -> Bool {
         return true
