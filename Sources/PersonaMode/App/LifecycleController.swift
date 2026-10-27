@@ -45,6 +45,8 @@ public final class LifecycleController {
             pump.start()
             self.heartbeatPump = pump
 
+            GuardianLauncher.spawn(supportDir: store.supportDir)
+
             // If PERSONA_PHASE1_DEMO=1, apply dock & menuBar autohide mutations
             if ProcessInfo.processInfo.environment["PERSONA_PHASE1_DEMO"] == "1" {
                 let mutator = SystemMutator(store: store, adapter: adapter, state: state)
