@@ -112,7 +112,7 @@
   /bin/bash -n scripts/restore_macos.sh && /bin/bash scripts/test_restore_script.sh   # prints "ALL RESTORE SCRIPT TESTS PASSED"
   ```
 
-- [ ] **P1.7 ⚠ REAL MUTATION — Spike S-1: live Dock/Menu Bar auto-hide mechanisms on macOS 26**
+- [x] **P1.7 ⚠ REAL MUTATION — Spike S-1: live Dock/Menu Bar auto-hide mechanisms on macOS 26**
   **Files:** `docs/SPIKE_RESULTS.md` (create).
   **Details:** Determine empirically and record: (a) does `tell application "System Events" to set autohide menu bar of dock preferences to true` hide the native menu bar immediately (no logout)? (b) Does it create/modify `_HIHideMenuBar`/`AppleMenuBarVisibleInFullscreen`? (c) Same for Dock `autohide` (does it create the `autohide` key; is `killall Dock` needed)? (d) Does deleting the key after setting `false` change behavior? (e) Does the result differ via `defaults write NSGlobalDomain _HIHideMenuBar -bool true` + `killall SystemUIServer`? Use this **self-healing one-liner pattern** for each experiment:
   ```bash
