@@ -135,7 +135,7 @@
   - `FakeSystemAdapter`: in-memory "world" struct with an `onWrite` hook; supports injecting failures per call.
   **Verify:** `V-TEST mutator` — includes (1) apply→restore returns world to original, (2) **crash injection:** for every `k` in `0…N` of the apply sequence, drop all in-memory objects after step `k`, construct fresh `RecoveryManager` against the same store + same mutated fake world, assert world == original, (3) pending-only ledger entries are restored, (4) stale-active at launch recovers *before* snapshot (second snapshot never equals mutated world), (5) absent-key originals restore to "absent".
 
-- [ ] **P1.9 Restore service, signal guard, AppDelegate lifecycle hooks**
+- [x] **P1.9 Restore service, signal guard, AppDelegate lifecycle hooks**
   **Files:** `Sources/PersonaCore/Lifecycle/RestoreService.swift`, `Sources/PersonaMode/Lifecycle/{SignalGuard,HeartbeatPump}.swift`, `Sources/PersonaMode/App/{AppDelegate,LifecycleController,MainMenu}.swift`, `Sources/PersonaMode/main.swift`, `Sources/PersonaSelfTest/Suites/RestoreSuite.swift`.
   **Details:**
   - `RestoreService.restoreAll(reason:) -> RestoreReport` implements §9.6: phase flush → Dock → Menu Bar → Wallpaper (each in `do/catch`; independent) → `modules.stopAll()` closure hooks → temp/terminal cleanup → **verify** by re-reading adapter and diffing against snapshot → delete state files, `session.lock` last; else keep `active=true`. Idempotent (I4); total budget 2.5 s enforced by adapter-level timeouts. `RestoreReport` lists per-step ok/err and `verified: Bool`.

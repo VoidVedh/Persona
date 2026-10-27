@@ -6,7 +6,8 @@ let suites: [(name: String, run: (Harness) -> Void)] = [
     ("config", ConfigSuite.run),
     ("state", StateSuite.run),
     ("ledger", LedgerSuite.run),
-    ("mutator", MutatorSuite.run)
+    ("mutator", MutatorSuite.run),
+    ("restore", RestoreSuite.run)
 ]
 
 let harness = Harness()
