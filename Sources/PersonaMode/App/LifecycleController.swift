@@ -82,7 +82,27 @@ public final class LifecycleController {
         config = loaded
         for warning in warnings { fputs("config: \(warning)\n", stderr) }
 
-        let host = WindowHostManager(config: config, factory: PlaceholderContentFactory())
+        // Start Telemetry & Tracking Services
+        TelemetryStore.shared.start()
+        FocusTracker.shared.start()
+        SpaceProvider.shared.start()
+        NowPlayingService.shared.start()
+
+        // Wire Quit notification
+        NotificationCenter.default.addObserver(
+            forName: NSNotification.Name("dev.persona.mode.exit"),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.exitPersona()
+            }
+        }
+
+        let factory = PersonaContentFactory(onQuit: { [weak self] in
+            self?.exitPersona()
+        })
+        let host = WindowHostManager(config: config, factory: factory)
         windowHost = host
         host.start()
 
@@ -95,6 +115,11 @@ public final class LifecycleController {
     private func stopModules() {
         windowHost?.stop()
         windowHost = nil
+
+        TelemetryStore.shared.stop()
+        FocusTracker.shared.stop()
+        SpaceProvider.shared.stop()
+        NowPlayingService.shared.stop()
     }
 
     /// Return-to-macOS: restore synchronously, then terminate (also reached from bar QUIT, Phase 3).

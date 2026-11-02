@@ -9,7 +9,9 @@ let suites: [(name: String, run: (Harness) -> Void)] = [
     ("mutator", MutatorSuite.run),
     ("restore", RestoreSuite.run),
     ("coords", CoordSuite.run),
-    ("windows", WindowSuite.run)
+    ("windows", WindowSuite.run),
+    ("theme", ThemeSuite.run),
+    ("telemetry", TelemetrySuite.run)
 ]
 
 let harness = Harness()

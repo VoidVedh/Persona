@@ -211,12 +211,12 @@ Probe asserts above; all Phase 1 gates still green (`swift run persona-selftest`
 
 **Goal:** the visuals and live data. Verified headlessly with `ImageRenderer` PNGs and `--probe` JSON.
 
-- [ ] **P3.1 Fonts & design tokens**
+- [x] **P3.1 Fonts & design tokens**
   **Files:** `scripts/fetch_fonts.sh`, `Resources/fonts/*`, `Sources/PersonaCore/Theme/ThemeTokens.swift`, `Sources/PersonaMode/UI/Theme/{ThemeColors,Fonts}.swift`, `Sources/PersonaSelfTest/Suites/ThemeSuite.swift`.
   **Details:** `fetch_fonts.sh` downloads (curl `-fsSL`) from `https://github.com/google/fonts/raw/main/ofl/rajdhani/{Rajdhani-SemiBold.ttf,Rajdhani-Bold.ttf,OFL.txt}` and `…/ofl/bebasneue/{BebasNeue-Regular.ttf,OFL.txt}` into `Resources/fonts/` (rename licenses `OFL-rajdhani.txt`, `OFL-bebasneue.txt`). `ThemeTokens` (Core, hex strings): `cyan #00d8ff`, `midnight #0a192f`, `abyss #050c1a`, `ice #e8f6ff`, `azure #1f6bff`, `steel #3a5a7a`, `warn #ffd24a`, `alert #ff3b5c`, `darkHour #5dffcf`; `skewDegrees = -12`; radii/spacings. `ThemeColors`: SwiftUI `Color(hex:)` mapping. `Fonts.register()`: `CTFontManagerRegisterFontsForURL(url, .process, &err)` for each file in `Bundle.main.resourceURL/fonts` else `PERSONA_RESOURCE_DIR/fonts` else `<repo>/Resources/fonts` (**process scope only → zero trace**); helpers `Fonts.display(size)`, `Fonts.body(size)` with fallback chain `Rajdhani → "Avenir Next Condensed" → .system(.rounded)`.
   **Verify:** `bash scripts/fetch_fonts.sh && file Resources/fonts/*.ttf` (each "TrueType Font data"); `V-TEST theme` (hex parse valid, contrast ratio `ice` on `midnight` ≥ 7, `cyan` on `midnight` ≥ 7); probe `swift run PersonaMode --probe fonts` prints `{"rajdhani": true, "bebas": true}` (checks `NSFont(name:)` non-nil).
 
-- [ ] **P3.2 Skewed shape library**
+- [x] **P3.2 Skewed shape library**
   **Files:** `Sources/PersonaMode/UI/Shapes/{SkewedPill,AngledPanel,ChevronBadge,HexRing,Halftone}.swift`, `Sources/PersonaMode/Probes/ProbeRender.swift`.
   **Details:** `SkewedPill: Shape` (parallelogram with horizontal inset `h·tan(skew)`, animatable `skew`), `AngledPanel` (rectangle with one clipped corner top-right + skewed left edge, optional inner stroke inset), `ChevronBadge` (arrow-ended tag), `HexRing` (regular hexagon stroke, rotation param), `Halftone` (`Canvas` dot grid, dot radius gradient along an axis). All take their skew from `ThemeTokens.skewDegrees`. `ProbeRender`: `--probe render <name> <out.png> [--w W --h H --scale 2]` using `ImageRenderer` on `@MainActor` (`renderer.scale`, `cgImage` → PNG via `CGImageDestination`); `name ∈ shapes|topbar|hud|launcher|wallpaper`. `shapes` renders a contact sheet on `abyss` background.
   **Verify:**
@@ -225,7 +225,7 @@ Probe asserts above; all Phase 1 gates still green (`swift run persona-selftest`
   ```
   Expected PNG 900pt×400pt @2x. **Open the PNG** and confirm parallelograms are skewed (not rectangles), cyan on midnight, no clipping.
 
-- [ ] **P3.3 Telemetry samplers + math (selftested)**
+- [x] **P3.3 Telemetry samplers + math (selftested)**
   **Files:** `Sources/PersonaCore/Telemetry/{CPUMath,MemoryMath}.swift`, `Sources/PersonaMode/Telemetry/{TelemetryStore,CPUSampler,MemorySampler,BatterySampler,WiFiSampler,VolumeSampler}.swift`, `Sources/PersonaSelfTest/Suites/TelemetrySuite.swift`, `Sources/PersonaMode/Probes/ProbeTelemetry.swift`.
   **Details:**
   - `CPUMath.usage(prev:[UInt32 ticks×4 per core], cur:) -> Double` (user+system+nice over total deltas; clamp 0–100). `MemoryMath.usedPercent(active:wired:compressed:total:)` (Activity-Monitor-style "used" = active+wired+compressed).
@@ -234,17 +234,17 @@ Probe asserts above; all Phase 1 gates still green (`swift run persona-selftest`
   - Probe: `--probe telemetry --samples 3` emits 3 samples (1 s apart) `{cpu, ram, batteryPercent?, charging?, wifi:{connected,bars}, volume:{percent,muted}}`.
   **Verify:** `V-TEST telemetry` (golden vectors for deltas, clamps, wrap-around of `UInt32` counters); `swift run PersonaMode --probe telemetry --samples 3 --out /tmp/t.json && plutil -extract samples.2.cpu raw -o - /tmp/t.json && plutil -extract samples.0.ram raw -o - /tmp/t.json` (numbers in 0–100; RAM within ±15 % of `memory_pressure | grep 'free percentage'` inverse sanity).
 
-- [ ] **P3.4 Focus tracker (app name; title provider hook)**
+- [x] **P3.4 Focus tracker (app name; title provider hook)**
   **Files:** `Sources/PersonaMode/Telemetry/FocusTracker.swift`.
   **Details:** `NSWorkspace.shared.notificationCenter` `didActivateApplicationNotification` → `AppState.focusedApp = app.localizedName?.uppercased()`. Protocol `FocusTitleProvider { func title(for pid: pid_t) -> String? }` with default `NullTitleProvider`; Phase 4 injects the AX implementation. Ignore Persona itself.
   **Verify:** `V-BUILD`; probe `--probe focus --seconds 3` prints `{app, bundleId}` of the frontmost app (run in a terminal → "TERMINAL"/"GHOSTTY"…).
 
-- [ ] **P3.5 Space provider (workspace indicators)** — includes Spike S-3
+- [x] **P3.5 Space provider (workspace indicators)** — includes Spike S-3
   **Files:** `Sources/PersonaMode/Telemetry/SpaceProvider.swift`.
   **Details:** `@_silgen_name("CGSMainConnectionID") func CGSMainConnectionID() -> Int32`, `CGSCopyManagedDisplaySpaces(Int32) -> CFArray`, `CGSGetActiveSpace(Int32) -> UInt64`, resolved with `dlsym(RTLD_DEFAULT, …)` first (graceful absence ⇒ `available=false`). Parse spaces for the display containing the bar (key `Spaces`, `ManagedSpaceID`, `Current Space`). Output `SpaceInfo { index(1…n), isActive, isOccupied? }` clamped to 5. Refresh on `activeSpaceDidChangeNotification`. `switchTo(_ n: Int)`: posts synthetic `Ctrl+N` via `CGEvent` (keycodes 18–23 for 1–5) only if symbolic hotkey for "Switch to Desktop N" is enabled (read `com.apple.symbolichotkeys` AppleSymbolicHotKeys ids 118–122 `enabled`); else emits `AppState.hint`.
   **Verify:** probe `--probe spaces` prints `{available, count, active}`; result recorded as S-3 in `docs/SPIKE_RESULTS.md`; `available=false` must still yield a sane single-pill fallback (unit-test the fallback mapping in `ThemeSuite` or a small Core function).
 
-- [ ] **P3.6 Top bar view (notch-aware)**
+- [x] **P3.6 Top bar view (notch-aware)**
   **Files:** `Sources/PersonaMode/UI/TopBar/{TopBarView,WorkspacePills,FocusLabel,TelemetryPills,ClockBadge,QuitButton}.swift`, `Sources/PersonaMode/Windows/TopBarPanel.swift` (modify to host `TopBarView`).
   **Details:** per §8.1. Background: `AngledPanel` fill `midnight @ 92 %` with 1 pt cyan hairline and a short cyan "tick" accent at the left. Workspace pills use `SkewedPill` (active: cyan fill + `midnight` bold digit + glow shadow; inactive: stroke `steel`). Focus label: app name (Bebas 15) + title (Rajdhani 13, `.lineLimit(1)`, `.truncationMode(.tail)`, max 40 % width). Telemetry pills as `SkewedPill` with icon (SF Symbols: `cpu`, `memorychip`, `battery.*`, `wifi`/`wifi.slash`, `speaker.wave.2`/`speaker.slash`) + number; warn/alert thresholds (§8.1). Clock: two-line badge (`HH:mm` display font 20, `EEE dd MMM`). `QuitButton`: angled red-tinted pill `QUIT` → `CommandRouter.send(.exitPersona)`; `.help("Return to macOS")`. Notch: if `ScreenModel.auxLeft/auxRight` present, lay out left cluster inside `auxLeft`, right cluster inside `auxRight` (Spacer replaced by the notch gap). Every interactive element gets `.accessibilityIdentifier("topbar.<name>")`.
   **Verify:**
@@ -253,17 +253,17 @@ Probe asserts above; all Phase 1 gates still green (`swift run persona-selftest`
   ```
   Open the PNG: pills skewed, text legible, nothing clipped; repeat with `--notch 180` (probe option that simulates a 180pt notch gap) and confirm the center gap.
 
-- [ ] **P3.7 Now Playing service**
+- [x] **P3.7 Now Playing service**
   **Files:** `Sources/PersonaMode/Telemetry/NowPlayingService.swift`, `Sources/PersonaMode/UI/HUD/NowPlayingWidget.swift`.
   **Details (ADR-7):** `DistributedNotificationCenter.default()` observers for `com.apple.Music.playerInfo` (keys `Name`, `Artist`, `Album`, `Player State` ∈ Playing/Paused/Stopped) and `com.spotify.client.PlaybackStateChanged` (keys `Name`, `Artist`, `Player State`). Seed once at start: for each of Music/Spotify that `NSRunningApplication.runningApplications(withBundleIdentifier:)` reports running (`com.apple.Music`, `com.spotify.client`), run AppleScript `tell application id "…" to get {name of current track, artist of current track, player state as string}` with timeout 2 s (**never** when not running). Publish `NowPlaying?` to `AppState`. Widget: skewed comic-book frame (`AngledPanel` + `Halftone` corner), title (display font, 1 line marquee if > width), artist, play/pause glyph, animated 3-bar equalizer when playing; "NOTHING PLAYING" idle state.
   **Verify:** `swift run PersonaMode --probe nowplaying --seconds 3` prints `{source, state, title, artist}` or `{"state":"none"}`; inject a synthetic notification and assert parsing: `swift run PersonaMode --probe nowplaying-inject --out /tmp/np.json` (probe posts a fake `com.spotify.client.PlaybackStateChanged` userInfo to itself and asserts `title == "TEST"`).
 
-- [ ] **P3.8 Desktop HUD: wallpaper, widgets, ambient accents, Dark Hour phase**
+- [x] **P3.8 Desktop HUD: wallpaper, widgets, ambient accents, Dark Hour phase**
   **Files:** `Sources/PersonaCore/Theme/DarkHourPhase.swift`, `Sources/PersonaMode/UI/HUD/{HUDView,WallpaperView,DateTimeWidget,AmbientAccents}.swift`, `Sources/PersonaMode/Windows/DesktopOverlayWindow.swift` (modify), `Sources/PersonaSelfTest/Suites/ThemeSuite.swift` (extend).
   **Details:** `DarkHourPhase.phase(for: Date, calendar:, force: Bool?) -> {darkHour, earlyMorning, daytime, evening, lateNight}` per §8.2 (`00:00–00:59` = darkHour). `WallpaperView` (only if `wallpaper.mode == .overlay`): `LinearGradient(abyss→midnight)`, large crescent (two overlapping circles via `Path` even-odd) with radial glow (darkHour ⇒ `darkHour` tint), faint hex grid, diagonal light bars. `DateTimeWidget` (top-right under bar): `AngledPanel` with big `HH:mm` (updates on the minute boundary via `TimelineView(.periodic(from:by:60))`), weekday/date, phase tag chip. `NowPlayingWidget` bottom-left. `AmbientAccents`: `TimelineView(.animation(minimumInterval: 1/Double(cfg.hud.fps)))` + `Canvas` rotating `HexRing`s and drifting skewed bars; **pause conditions** (§8.2) via `AppState.ambientPaused`. `DesktopOverlayWindow` hosts `HUDView` (`NSHostingView`, `.allowsHitTesting(false)`).
   **Verify:** `V-TEST theme` (phase table incl. 00:00, 00:59, 01:00, 23:59, forced override, DST-safe via fixed `Calendar`); `swift run PersonaMode --probe render hud /tmp/hud.png --w 1512 --h 982 --scale 1` and `--probe render wallpaper /tmp/wp.png`; open PNGs and check composition (moon, widgets in corners, nothing overlapping the top 50pt bar zone).
 
-- [ ] **P3.9 Wire Phase 3 into the lifecycle + perf budget check**
+- [x] **P3.9 Wire Phase 3 into the lifecycle + perf budget check**
   **Files:** `Sources/PersonaMode/App/{AppState,LifecycleController}.swift`, `scripts/perf_check.sh`.
   **Details:** Start `TelemetryStore`, `NowPlayingService`, `FocusTracker`, `SpaceProvider` after window hosts; register stop hooks with `RestoreService`. `scripts/perf_check.sh [seconds=60]`: launches dry-run GUI, samples `ps -o %cpu=,rss= -p $PID` each 2 s, prints avg CPU & max RSS, kills it with SIGTERM, asserts budgets of §14 (CPU ≤ 4 %, RSS ≤ 150 MB), also runs again with `PERSONA_HUD_ANIMATION=0` env override (≤ 1 %).
   **Verify:** `V-BUILD && PERSONA_DRY_RUN=1 bash scripts/perf_check.sh 30` → `PERF OK`. **Manual:** launch GUI dry-run, confirm bar + HUD visible; `⌘Q` removes them.
