@@ -168,13 +168,20 @@ public final class RestoreService {
             finalState.phase = .restored
             store.delete()
 
-            // Remove heartbeat & windows.json
+            // Remove heartbeat, windows.json, and guardian lock metadata
             try? FileManager.default.removeItem(at: store.supportDir.appendingPathComponent("heartbeat"))
             try? FileManager.default.removeItem(at: store.supportDir.appendingPathComponent("windows.json"))
+            try? FileManager.default.removeItem(at: store.supportDir.appendingPathComponent("session.lock.guardian"))
 
             // Remove session.lock LAST
             let lockURL = store.supportDir.appendingPathComponent("session.lock")
             _ = unlink(lockURL.path)
+
+            // Remove supportDir if now empty
+            if let items = try? FileManager.default.contentsOfDirectory(atPath: store.supportDir.path), items.isEmpty {
+                _ = rmdir(store.supportDir.path)
+            }
+
             hasRestored = true
             steps.append(RestoreStepReport(step: "verify", success: true))
         } else {

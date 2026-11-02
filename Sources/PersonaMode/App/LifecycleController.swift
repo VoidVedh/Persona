@@ -7,6 +7,9 @@ public final class LifecycleController {
 
     public private(set) var store: StateStore
     public private(set) var adapter: SystemAdapter
+    /// Adapter used exclusively for stale-session recovery. Restoring original values is always
+    /// performed for real, even when the session itself runs in dry-run mode (I2).
+    private let recoveryAdapter: SystemAdapter
     public private(set) var restoreService: RestoreService?
     public private(set) var heartbeatPump: HeartbeatPump?
     public private(set) var sessionLock: SessionLock?
@@ -19,10 +22,12 @@ public final class LifecycleController {
         self.store = store
         if let customAdapter = adapter {
             self.adapter = customAdapter
+            self.recoveryAdapter = customAdapter
         } else {
             let isDryRun = ProcessInfo.processInfo.environment["PERSONA_DRY_RUN"] == "1"
             let isPhase1Demo = ProcessInfo.processInfo.environment["PERSONA_PHASE1_DEMO"] == "1"
             let real = RealSystemAdapter()
+            self.recoveryAdapter = real
             if isDryRun || !isPhase1Demo {
                 self.adapter = DryRunAdapter(underlying: real)
             } else {
@@ -36,6 +41,8 @@ public final class LifecycleController {
         isRunning = true
 
         do {
+            // I2: if a previous session died while mutating, restore it for real BEFORE snapshotting.
+            _ = try RecoveryManager.recoverIfStale(store: store, adapter: recoveryAdapter)
             let state = try SnapshotService.begin(store: store, lock: &sessionLock, adapter: adapter, mode: .overlay)
             let restore = RestoreService(store: store, adapter: adapter)
             self.restoreService = restore

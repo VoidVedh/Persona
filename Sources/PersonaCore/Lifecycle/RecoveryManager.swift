@@ -115,10 +115,15 @@ public final class RecoveryManager {
 
         if dockMatches && hideMatches && fsMatches {
             recoveringState.active = false
-            recoveringState.phase = .restored
             store.delete()
+            try? FileManager.default.removeItem(at: store.supportDir.appendingPathComponent("heartbeat"))
+            try? FileManager.default.removeItem(at: store.supportDir.appendingPathComponent("windows.json"))
+            try? FileManager.default.removeItem(at: store.supportDir.appendingPathComponent("session.lock.guardian"))
             if !SessionLock.isHeldByOther(dir: store.supportDir) {
                 _ = unlink(lockURL.path)
+            }
+            if let items = try? FileManager.default.contentsOfDirectory(atPath: store.supportDir.path), items.isEmpty {
+                _ = rmdir(store.supportDir.path)
             }
         } else {
             recoveringState.phase = .degraded

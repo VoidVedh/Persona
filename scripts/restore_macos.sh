@@ -198,6 +198,7 @@ run rm -f "$SUPPORT_DIR/state.json.tmp"
 run rm -f "$SUPPORT_DIR/state.json.prev"
 run rm -f "$SUPPORT_DIR/windows.json"
 run rm -f "$SUPPORT_DIR/heartbeat"
+run rm -f "$SUPPORT_DIR/session.lock.guardian"
 run rm -f "$SUPPORT_DIR/session.lock"
 
 # If support dir is empty, delete it
