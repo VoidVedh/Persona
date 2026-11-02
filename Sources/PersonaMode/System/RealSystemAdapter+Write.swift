@@ -7,8 +7,11 @@ extension RealSystemAdapter {
     public func setDockAutohide(_ v: Bool) throws {
         let script = "tell application \"System Events\" to set autohide of dock preferences to \(v)"
         let res = ShellRunner.runAppleScript(script, timeout: 3)
-        if res.status != 0 {
-            // Fallback: defaults write + killall Dock
+        let readBack = ShellRunner.runAppleScript("tell application \"System Events\" to get autohide of dock preferences", timeout: 2)
+        let actual = readBack.out.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+
+        if res.status != 0 || actual != "\(v)" {
+            // Fallback / macOS 26 direct: defaults write + killall Dock
             let writeRes = ShellRunner.run("/usr/bin/defaults", ["write", "com.apple.dock", "autohide", "-bool", v ? "true" : "false"], timeout: 3)
             _ = ShellRunner.run("/usr/bin/killall", ["Dock"], timeout: 3)
             if writeRes.status != 0 {
@@ -19,6 +22,7 @@ extension RealSystemAdapter {
 
     public func deleteDockAutohideKey() throws {
         _ = ShellRunner.run("/usr/bin/defaults", ["delete", "com.apple.dock", "autohide"], timeout: 3)
+        _ = ShellRunner.run("/usr/bin/killall", ["Dock"], timeout: 3)
         CFPreferencesSetAppValue("autohide" as CFString, nil, "com.apple.dock" as CFString)
         CFPreferencesAppSynchronize("com.apple.dock" as CFString)
     }
