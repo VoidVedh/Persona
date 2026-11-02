@@ -6,7 +6,7 @@
     "height": 34,
     "marginTop": 6,
     "marginSide": 10,
-    "level": "mainMenuMinusOne"
+    "level": "statusBar"
   },
   "hud": {
     "primaryScreenOnly": true,

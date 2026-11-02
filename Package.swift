@@ -19,14 +19,21 @@ let package = Package(
             name: "PersonaCore",
             swiftSettings: swift5
         ),
-        .executableTarget(
-            name: "PersonaMode",
+        // AppKit/SwiftUI layer (windows, UI, telemetry). A library so that persona-selftest can
+        // import and assert on real NSWindow configuration (an executable target cannot be imported).
+        .target(
+            name: "PersonaKit",
             dependencies: ["PersonaCore"],
             swiftSettings: swift5
         ),
         .executableTarget(
+            name: "PersonaMode",
+            dependencies: ["PersonaCore", "PersonaKit"],
+            swiftSettings: swift5
+        ),
+        .executableTarget(
             name: "PersonaSelfTest",
-            dependencies: ["PersonaCore"],
+            dependencies: ["PersonaCore", "PersonaKit"],
             swiftSettings: swift5
         )
     ]

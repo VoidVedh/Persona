@@ -1,7 +1,9 @@
 import AppKit
 import Foundation
 import PersonaCore
+import PersonaKit
 
+@MainActor
 public final class LifecycleController {
     public static let shared = LifecycleController()
 
@@ -13,6 +15,8 @@ public final class LifecycleController {
     public private(set) var restoreService: RestoreService?
     public private(set) var heartbeatPump: HeartbeatPump?
     public private(set) var sessionLock: SessionLock?
+    public private(set) var windowHost: WindowHostManager?
+    public private(set) var config: AppConfig = AppConfig()
     public private(set) var isRunning = false
 
     public init(
@@ -60,9 +64,51 @@ public final class LifecycleController {
                 try mutator.apply(.dockAutohide(true))
                 try mutator.apply(.menuBarAutohide(true))
             }
+
+            startWindows(restore: restore)
         } catch {
             fputs("LifecycleController start failed: \(error)\n", stderr)
             _ = restoreService?.restoreAll(reason: .exception)
+            if error as? SnapshotServiceError == .sessionAlreadyActive {
+                // Another Persona Mode session owns the system state; never touch it from here.
+                NSApp.terminate(nil)
+            }
+        }
+    }
+
+    private func startWindows(restore: RestoreService) {
+        let userConfig = store.supportDir.appendingPathComponent("config.json")
+        let (loaded, warnings) = AppConfig.load(userFile: userConfig)
+        config = loaded
+        for warning in warnings { fputs("config: \(warning)\n", stderr) }
+
+        let host = WindowHostManager(config: config, factory: PlaceholderContentFactory())
+        windowHost = host
+        host.start()
+
+        // Module teardown runs *after* Dock/Menu Bar/Wallpaper are restored (I5).
+        restore.registerModuleStopHook { [weak self] in
+            LifecycleController.runOnMain { self?.stopModules() }
+        }
+    }
+
+    private func stopModules() {
+        windowHost?.stop()
+        windowHost = nil
+    }
+
+    /// Return-to-macOS: restore synchronously, then terminate (also reached from bar QUIT, Phase 3).
+    public func exitPersona() {
+        _ = restoreService?.restoreAll(reason: .userQuit)
+        NSApp.terminate(nil)
+    }
+
+    /// Runs `block` on the main thread without deadlocking when already there.
+    nonisolated static func runOnMain(_ block: @escaping @MainActor () -> Void) {
+        if Thread.isMainThread {
+            MainActor.assumeIsolated { block() }
+        } else {
+            DispatchQueue.main.sync { MainActor.assumeIsolated { block() } }
         }
     }
 }

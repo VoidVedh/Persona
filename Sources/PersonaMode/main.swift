@@ -1,6 +1,7 @@
 import AppKit
 import Foundation
 import PersonaCore
+import PersonaKit
 
 let args = CommandLine.arguments
 
@@ -32,13 +33,12 @@ if args.count >= 3 && args[1] == "--probe" {
     let probeName = args[2]
     let remainingArgs = Array(args.dropFirst(3))
 
-    switch probeName {
-    case "snapshot":
-        let code = ProbeSnapshot.run(args: remainingArgs)
+    MainActor.assumeIsolated {
+        guard let code = ProbeRegistry.run(name: probeName, args: remainingArgs) else {
+            fputs("Unknown probe: \(probeName). Known: \(ProbeRegistry.names.joined(separator: ", "))\n", stderr)
+            exit(1)
+        }
         exit(code)
-    default:
-        fputs("Unknown probe: \(probeName)\n", stderr)
-        exit(1)
     }
 }
 

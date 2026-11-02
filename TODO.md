@@ -166,32 +166,32 @@
 
 **Goal:** correct windows, levels, behaviors, notch handling, multi-display — with placeholder content (solid-color rectangles).
 
-- [ ] **P2.1 Screen model & coordinate helpers**
+- [x] **P2.1 Screen model & coordinate helpers**
   **Files:** `Sources/PersonaCore/Layout/CoordinateSpace.swift`, `Sources/PersonaMode/Windows/ScreenModel.swift`, `Sources/PersonaSelfTest/Suites/CoordSuite.swift`.
   **Details:** Core: `CoordinateSpace.toAX(_ r: CGRect, primaryHeight: CGFloat)`/`toAppKit(...)` (`y' = H − (y + h)`), pure & tested for single and stacked/offset multi-display geometries (negative origins). PersonaMode: `ScreenModel { id: CGDirectDisplayID, uuid, frame, visibleFrame, safeTop: CGFloat, auxLeft: CGRect?, auxRight: CGRect?, backingScale }` built from `NSScreen` (`safeAreaInsets`, `auxiliaryTopLeftArea`, `auxiliaryTopRightArea`); `ScreenObserver` publishes on `NSApplication.didChangeScreenParametersNotification`.
   **Verify:** `V-TEST coords` (round-trip equality incl. negative-origin secondary display; known-value table).
 
-- [ ] **P2.2 Window level constants & base panel classes**
+- [x] **P2.2 Window level constants & base panel classes**
   **Files:** `Sources/PersonaMode/Windows/{WindowLevels,PersonaPanel}.swift`.
   **Details:** `enum WindowLevels { static var desktopOverlay: NSWindow.Level { .init(rawValue: Int(CGWindowLevelForKey(.desktopIconWindow)) - 1) }; static var topBar: NSWindow.Level { .init(rawValue: Int(NSWindow.Level.mainMenu.rawValue) - 1) }; static let launcher = NSWindow.Level(rawValue: NSWindow.Level.popUpMenu.rawValue - 1); static let border = NSWindow.Level.floating }` (+ `.statusBar` alternative via config). `class PersonaPanel: NSPanel` — `init(contentRect:)` with `[.borderless,.nonactivatingPanel]`, `isOpaque=false`, `backgroundColor=.clear`, `hasShadow=false`, `hidesOnDeactivate=false`, `isReleasedWhenClosed=false`, `canBecomeKey/Main` overridable flags, **`override func constrainFrameRect(_ r: NSRect, to s: NSScreen?) -> NSRect { r }`**, `animationBehavior = .none`.
   **Verify:** `V-BUILD`.
 
-- [ ] **P2.3 `TopBarPanel`**
+- [x] **P2.3 `TopBarPanel`**
   **Files:** `Sources/PersonaMode/Windows/TopBarPanel.swift`.
   **Details:** frame per §5/§8.1: `x = screen.frame.minX + marginSide`, `width = screen.frame.width − 2*marginSide`, `height = max(cfg.height, screen.safeTop)`, `y = screen.frame.maxY − marginTop − height`; level from `cfg.topBar.level`; `collectionBehavior = [.canJoinAllSpaces,.stationary,.ignoresCycle]`; content = `NSHostingView(rootView: Color(red:0, green:0.85, blue:1).opacity(0.85))` placeholder; `canBecomeKey=false`. `reposition(for:)` for screen changes.
   **Verify:** deferred to P2.6 probe (`V-BUILD` now).
 
-- [ ] **P2.4 `DesktopOverlayWindow`**
+- [x] **P2.4 `DesktopOverlayWindow`**
   **Files:** `Sources/PersonaMode/Windows/DesktopOverlayWindow.swift`.
   **Details:** `NSWindow(contentRect: screen.frame, styleMask:.borderless, backing:.buffered, defer:false)`; `level = WindowLevels.desktopOverlay`; `ignoresMouseEvents = true`; `collectionBehavior = [.canJoinAllSpaces,.stationary,.ignoresCycle]`; `isOpaque = (mode == .overlay)`; `backgroundColor = (mode == .overlay) ? midnight : .clear`; `hasShadow=false`; `sharingType = .none`; `isExcludedFromWindowsMenu = true`; `canBecomeKey/Main = false` (override). Placeholder content: translucent diagonal stripe `Canvas`.
   **Verify:** deferred to P2.6.
 
-- [ ] **P2.5 `WindowHostManager`**
+- [x] **P2.5 `WindowHostManager`**
   **Files:** `Sources/PersonaMode/Windows/WindowHostManager.swift`, `Sources/PersonaMode/App/LifecycleController.swift` (modify).
   **Details:** owns `[CGDirectDisplayID: (bar: TopBarPanel, overlay: DesktopOverlayWindow)]`; `start(config:)` creates & `orderFrontRegardless()`; rebuild on screen param change / `NSWorkspace.didWakeNotification` / `activeSpaceDidChangeNotification` (re-assert level + order); `stop()` `orderOut(nil)` + `close()` + release (registered as a `RestoreService` module-stop hook). HUD content only on primary when `hud.primaryScreenOnly`. Lifecycle wiring: after `SnapshotService.begin` → `WindowHostManager.start` (in dry-run mode no system mutation).
   **Verify:** `V-BUILD`.
 
-- [ ] **P2.6 `--probe windows` + Spike S-2 (levels on Tahoe) + Spike S-5 (hosting transparency)**
+- [x] **P2.6 `--probe windows` + Spike S-2 (levels on Tahoe) + Spike S-5 (hosting transparency)**
   **Files:** `Sources/PersonaMode/Probes/ProbeWindows.swift`, `docs/SPIKE_RESULTS.md`.
   **Details:** `--probe windows --seconds 2 --out f`: with `PERSONA_DRY_RUN=1` semantics, start `WindowHostManager`, wait, then for **each window owned by this PID** from `CGWindowListCopyWindowInfo([.optionAll], kCGNullWindowID)` emit `{role: bar|overlay, layer: kCGWindowLayer, bounds, alpha, onScreen}` plus `NSWindow` introspection `{ignoresMouseEvents, canBecomeKey, level.rawValue, collectionBehavior.rawValue}`; also emit `constants: {desktopWindow, desktopIconWindow, mainMenu, statusBar, popUpMenu}` from `CGWindowLevelForKey`. Spike notes in `docs/SPIKE_RESULTS.md` (S-2): (1) bar layer == 23, overlay layer == desktopIcon−1; (2) **manual:** hover top edge — native menu bar must reveal *above* our bar; (3) **manual:** put an app fullscreen — bar hidden; (4) bar frame on the notched built-in display clears the notch; (5) clicks on desktop icons pass through the overlay; (6) S-5: placeholder SwiftUI view renders with true transparency (no black box).
   **Verify:**

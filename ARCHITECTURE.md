@@ -118,7 +118,9 @@ Rejected hybrid: "use AeroSpace for tiling only". Same off-screen-window hazard.
 - Clicking a pill / `⌃⌥N` posts a synthetic `Ctrl+N` (CGEvent). It works only if the user enabled *Keyboard Shortcuts → Mission Control → Switch to Desktop N*; the app detects this by reading `com.apple.symbolichotkeys` (read-only) and shows a one-line hint if disabled.
 - Tiling is **per active Space** (AX only exposes windows of the current Space anyway).
 
-### ADR-6 — Top bar window level: `.mainMenu − 1` (23), configurable; not 25
+### ADR-6 — Top bar window level (**amended: default is now `.statusBar` (25)**; originally `.mainMenu − 1` (23))
+> **Amendment (project owner request, see `docs/SPIKE_RESULTS.md` S-2):** the default is `.statusBar` with `collectionBehavior` including `.fullScreenAuxiliary`. The trade-off analysed below still applies: while the native menu bar is not auto-hidden, the bar covers it. `topBar.level = "mainMenuMinusOne"` restores the original behavior.
+
 - The spec offers `.statusBar` or `.mainMenu + 1` (both = 25). A level above the native menu bar (24) would **permanently cover the native menu bar even when auto-hide reveals it**, making app menus (File/Edit/…) unreachable — an unrecoverable usability trap.
 - Level **23** sits above all normal/floating/modal windows but *below* the revealed native menu bar, so hovering the top edge reveals native menus on top of our bar. `topBar.level` config accepts `"statusBar"` to honor the literal spec.
 - Panel must override `constrainFrameRect(_:to:)` to return the requested frame (AppKit otherwise pushes panels below the menu bar / notch).
@@ -529,7 +531,9 @@ Persona/
 │   │   ├── Launcher/FuzzyMatcher.swift
 │   │   ├── Theme/{ThemeTokens,DarkHourPhase}.swift
 │   │   └── Telemetry/{CPUMath,MemoryMath}.swift
-│   ├── PersonaMode/                   # AppKit/SwiftUI executable
+│   ├── PersonaKit/                    # AppKit/SwiftUI library (windows, UI, telemetry) — importable by selftest
+│   │   └── {Windows,UI,Telemetry,App}/ # amended: Windows/UI/Telemetry live here, not in PersonaMode (see SPIKE_RESULTS S-2)
+│   ├── PersonaMode/                   # executable: main, lifecycle, system adapters, probes
 │   │   ├── main.swift                 # arg dispatch: GUI | --ctl | --probe | --restore-only
 │   │   ├── App/{AppDelegate,LifecycleController,CommandRouter,EventBus,AppState,MainMenu}.swift
 │   │   ├── Lifecycle/{SignalGuard,HeartbeatPump,GuardianLauncher,ShellRunner}.swift

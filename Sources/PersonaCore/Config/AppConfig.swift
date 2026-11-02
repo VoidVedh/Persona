@@ -39,7 +39,7 @@ public struct TopBarConfig: Codable, Equatable {
         height: CGFloat = 34,
         marginTop: CGFloat = 6,
         marginSide: CGFloat = 10,
-        level: BarLevel = .mainMenuMinusOne
+        level: BarLevel = .statusBar
     ) {
         self.height = height
         self.marginTop = marginTop
@@ -52,7 +52,7 @@ public struct TopBarConfig: Codable, Equatable {
         self.height = try container.decodeIfPresent(CGFloat.self, forKey: .height) ?? 34
         self.marginTop = try container.decodeIfPresent(CGFloat.self, forKey: .marginTop) ?? 6
         self.marginSide = try container.decodeIfPresent(CGFloat.self, forKey: .marginSide) ?? 10
-        self.level = try container.decodeIfPresent(BarLevel.self, forKey: .level) ?? .mainMenuMinusOne
+        self.level = try container.decodeIfPresent(BarLevel.self, forKey: .level) ?? .statusBar
     }
 }
 
