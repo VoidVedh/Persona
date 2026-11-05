@@ -277,42 +277,42 @@ Selftests green; PNG renders reviewed; telemetry/nowplaying/spaces probes OK; pe
 
 **Goal:** tile windows with gaps below the bar; glowing border follows focus; fully reversible.
 
-- [ ] **P4.1 Layout engine (pure Core)**
+- [x] **P4.1 Layout engine (pure Core)**
   **Files:** `Sources/PersonaCore/Layout/{LayoutEngine,Gaps}.swift`, `Sources/PersonaSelfTest/Suites/LayoutSuite.swift`.
   **Details:** per §8.3: `struct BarInset { marginTop, height }`, `struct Gaps { outer, inner }`, `typealias WindowID = UInt32`, `LayoutEngine.layout(ids:screen:bar:gaps:algorithm:splitRatio:) -> [WindowID: CGRect]` (AX/top-left coords), dwindle + masterStack; integer rounding; deterministic ordering; empty/1-window cases; guard against rects below 100×60 by falling back to **stacking remaining windows in last cell** (never zero/negative sizes).
   **Verify:** `V-TEST layout` with assertions: 1 window fills `usable`; 2 windows split with seam == `inner`; 5 windows no overlaps & all inside `usable`; **every `rect.minY >= screen.minY + bar.marginTop + bar.height + gaps.outer`** (bar inset invariant) for 1…12 windows on a 1512×982 screen and a 2560×1440 screen with non-zero origin; ratio clamping.
 
-- [ ] **P4.2 Accessibility permission service + onboarding**
+- [x] **P4.2 Accessibility permission service + onboarding**
   **Files:** `Sources/PersonaMode/Accessibility/AXPermission.swift`, `Sources/PersonaMode/App/AppState.swift` (axTrusted), `Sources/PersonaMode/Probes/ProbeAX.swift`.
   **Details:** `AXPermission.isTrusted` = `AXIsProcessTrusted()`; `request()` = `AXIsProcessTrustedWithOptions([kAXTrustedCheckOptionPrompt.takeUnretainedValue(): true] as CFDictionary)`; poll 1 s until trusted → publish `axTrustChanged` (modules hot-start). Onboarding UI: small floating `PersonaPanel` card ("Persona Mode needs Accessibility to tile windows") with *Open Settings* (`NSWorkspace.shared.open(URL(string:"x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)`) and *Continue without tiling*. `--probe ax` prints `{trusted, bundleId, executablePath}`.
   **Verify:** after `make app` exists (P6.6 can be pulled forward — see note below) run `open -W -n "build/Persona Mode.app" --args --probe ax --out /tmp/ax.json && plutil -extract trusted raw -o - /tmp/ax.json` → `true` after granting; `false` before (and app must not crash). *Note:* if `build_app.sh` isn't done yet, implement **P6.6 now** (it has no dependencies on Phase 5/6 features).
 
-- [ ] **P4.3 AX private shims, window model, registry, float rules**
+- [x] **P4.3 AX private shims, window model, registry, float rules**
   **Files:** `Sources/PersonaMode/Accessibility/{AXPrivate,AXWorker,WindowRegistry,FloatRules}.swift`.
   **Details:** `AXPrivate`: `@_silgen_name("_AXUIElementGetWindow") func _AXUIElementGetWindow(_: AXUIElement, _: UnsafeMutablePointer<CGWindowID>) -> AXError` (wrap in `AXUIElement.windowID` returning `CGWindowID?`; fallback matches `kAXPositionAttribute/kAXSizeAttribute` + PID against `CGWindowListCopyWindowInfo` layer 0 windows). `AXWorker`: dedicated `Thread` running `CFRunLoopRun()`, `perform(_ block:)` + `performSync` helpers, `AXUIElementSetMessagingTimeout(systemWide, 0.25)`. `WindowRegistry`: for each `NSWorkspace.runningApplications` with `.regular` policy, `AXUIElementCreateApplication(pid)` → `kAXWindowsAttribute`; model `ManagedWindow { id: CGWindowID, pid, bundleId, element, frame, title, role, subrole, isMinimized, isFullscreen, isResizable, isTilable, spaceIndex? }`; AX attrs `kAXRoleAttribute, kAXSubroleAttribute, kAXMinimizedAttribute, "AXFullScreen", kAXTitleAttribute`; resizable via `AXUIElementIsAttributeSettable(kAXSizeAttribute/kAXPositionAttribute)`. `FloatRules.isTilable(_ w:, cfg:)` per §8.3.
   **Verify:** `open -W -n "build/Persona Mode.app" --args --probe windows-ax --out /tmp/wax.json` → JSON list; assert with `plutil -extract count raw -o - /tmp/wax.json` ≥ 1 when a Finder/Terminal window is open; confirm each entry has numeric `id` (non-null for ≥ 90 %) and `tilable` flags; windows of `dev.persona.mode` are never `tilable`.
 
-- [ ] **P4.4 AX observers & event stream**
+- [x] **P4.4 AX observers & event stream**
   **Files:** `Sources/PersonaMode/Accessibility/AXWindowObserver.swift`, `Sources/PersonaMode/App/EventBus.swift`.
   **Details:** per-app `AXObserver` created with `AXObserverCreate(pid, callback, &obs)`; run-loop source added to `AXWorker`'s run loop; subscribe `kAXWindowCreatedNotification`, `kAXUIElementDestroyedNotification`, `kAXFocusedWindowChangedNotification`, `kAXMainWindowChangedNotification`, `kAXWindowMovedNotification`, `kAXWindowResizedNotification`, `kAXWindowMiniaturizedNotification`, `kAXWindowDeminiaturizedNotification`; app-level `NSWorkspace.didLaunchApplication/didTerminateApplication` (+ retry observer creation up to 5× at 200 ms for apps not ready). Emit `PersonaEvent` values to `EventBus` on main. Remove observers on app terminate and in the module-stop hook (**all `CFRunLoopRemoveSource` + `CFRelease`** on stop).
   **Verify:** `--probe ax-events --seconds 10` prints events as JSON lines while the tester opens/closes/moves a window; `V-BUILD`. (Manual stimulus; probe exits 0 and prints ≥ 1 event.)
 
-- [ ] **P4.5 Tiling controller**
+- [x] **P4.5 Tiling controller**
   **Files:** `Sources/PersonaMode/Tiling/TilingController.swift`, `Sources/PersonaMode/Tiling/FrameJournal.swift`.
   **Details:** per §8.3. State per `(displayID, spaceIndex)`: ordered `[CGWindowID]`. `retile(display:)`: gather tilable windows on that display (window center in `ScreenModel.frame`, converted to AX coords), compute `LayoutEngine.layout` with `bar` = `BarInset(marginTop: cfg.topBar.marginTop, height: max(cfg.topBar.height, screen.safeTop))`, apply on `AXWorker` using `size → position → size`, read back & mark `constrained`. Debounce 60 ms; self-move suppression token; 150 ms drag-settle snap-back (`snapBackOnDrag`); `toggleFloat(focused)`; `tileNow` command; `setEnabled(false)` stops. `FrameJournal`: before the first tile of a window, record original frame in memory + `windows.json` (debounced 500 ms, in support dir); `restoreFrames(timeBudget: 1.0)` sets each existing window back (skip missing). Hook `restoreFrames` into `RestoreService` after critical restores (§9.6 step 5).
   **Verify:** `V-BUILD`; functional verification is P4.8.
 
-- [ ] **P4.6 Border geometry (Core) + renderer window**
+- [x] **P4.6 Border geometry (Core) + renderer window**
   **Files:** `Sources/PersonaCore/Layout/BorderGeometry.swift`, `Sources/PersonaMode/Windows/BorderOverlayWindow.swift`, `Sources/PersonaSelfTest/Suites/LayoutSuite.swift` (extend).
   **Details:** `BorderGeometry.ringRect(windowFrameAX:, width:) -> CGRect` (outset by `width/2` so the stroke lies in the gap) and `clampedWidth(width, innerGap)`. `BorderOverlayWindow` (one per screen; level `.floating`, `ignoresMouseEvents=true`, transparent, `canJoinAllSpaces`): root layer-backed `NSView` with a `CAShapeLayer` (`strokeColor` cyan, `lineWidth`, `fillColor` clear, `shadowColor` cyan, `shadowRadius 10`, `shadowOpacity 0.9`, `shadowOffset .zero`), `path = CGPath(roundedRect:cornerWidth:cornerHeight:)`; update with `CATransaction.setDisableActions(true)` (instant) or a 90 ms `CABasicAnimation` on `path` for glide; pulse `CABasicAnimation(keyPath:"shadowOpacity")` autoreversing 2.4 s when `border.pulse`.
   **Verify:** `V-TEST layout` (ring rect math; width clamp); `swift run PersonaMode --probe render border /tmp/border.png --w 600 --h 400` (probe draws a ring around a dummy rect) — open PNG, glow visible.
 
-- [ ] **P4.7 Border controller (follow focus) + Spike S-4**
+- [x] **P4.7 Border controller (follow focus) + Spike S-4**
   **Files:** `Sources/PersonaMode/Border/BorderController.swift`, `docs/SPIKE_RESULTS.md`.
   **Details:** Subscribes to `focusChanged`, `frameChangedExternally`, `windowDestroyed`, `spaceChanged`. Resolves focused window frame in AX coords → converts to AppKit coords for the screen's window → updates ring. During an active drag/resize (moved/resized events within 200 ms) run a 60 Hz `Timer`/display-link polling **only** `CGWindowListCreateDescriptionFromArray([wid])` bounds; stop 250 ms after last event. Hide when: AX untrusted, focused app is Persona, window fullscreen/minimized, no focused window. **S-4:** try `borderWindow.order(.above, relativeTo: Int(targetWindowID))`; record in SPIKE_RESULTS whether it keeps z-order correct with overlapping windows; keep `.floating` fallback if unreliable.
   **Verify:** `V-BUILD`; manual run via bundle (P4.8). Probe `--probe border-state --seconds 5 --out f` prints `{visible, frame, targetWindowId}` while a window is focused.
 
-- [ ] **P4.8 Integration + automated tiling E2E**
+- [x] **P4.8 Integration + automated tiling E2E**
   **Files:** `Sources/PersonaMode/App/LifecycleController.swift` (modify), `scripts/e2e_tiling.sh`.
   **Details:** Start `TilingController` and `BorderController` when AX trusted (and on `axTrustChanged`); register stop hooks; commands `tileNow`, `toggleFloatFocused` wired. `scripts/e2e_tiling.sh`: (1) require AX trust via `--probe ax`; (2) open 3 TextEdit windows (`osascript -e 'tell application "TextEdit" to make new document'` ×3); (3) launch the bundle in dry-run mode; (4) `PersonaMode --ctl tile`; sleep 1; (5) `--probe windows-ax` for TextEdit windows; (6) assert with `plutil -extract` + shell arithmetic: no pair overlaps; every `y ≥ barBottom + outerGap` (`barBottom = marginTop + height`); inner gaps == configured `inner` (±1 pt) between adjacent windows; (7) `--ctl quit`; (8) assert TextEdit windows' frames equal the original frames captured in step 2 (**frame restore works**, ±2 pt); (9) quit TextEdit without saving (`osascript … close every document saving no`).
   **Verify:** `V-BUILD && make app && bash scripts/e2e_tiling.sh` → `TILING E2E: PASS`. Manual: focus-follow glow looks right; dragging a window snaps back; `⌃⌥F` floats it.

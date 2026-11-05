@@ -7,7 +7,7 @@ import SwiftUI
 public enum ProbeRender: Probe {
     public static func run(args: [String]) -> Int32 {
         guard args.count >= 2 else {
-            fputs("Usage: --probe render <shapes|topbar|hud|wallpaper> <out.png> [--w W] [--h H] [--scale S] [--notch N]\n", stderr)
+            fputs("Usage: --probe render <shapes|topbar|hud|wallpaper|border|launcher> <out.png> [--w W] [--h H] [--scale S] [--notch N] [--query Q]\n", stderr)
             return 1
         }
         let targetName = args[0]
@@ -44,6 +44,8 @@ public enum ProbeRender: Probe {
             viewToRender = AnyView(HUDView(screen: screen))
         case "wallpaper":
             viewToRender = AnyView(WallpaperView())
+        case "border":
+            viewToRender = AnyView(BorderPreviewView(width: width, height: height))
         default:
             fputs("Unknown render target: \(targetName)\n", stderr)
             return 1

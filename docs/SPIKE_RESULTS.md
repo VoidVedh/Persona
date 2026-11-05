@@ -73,3 +73,26 @@ Measured with `PERSONA_DRY_RUN=1 swift run PersonaMode --probe windows --seconds
 - **Decision (Module split):** window/UI/telemetry code lives in a new library target `PersonaKit` so
   `persona-selftest` can import it and assert on real `NSWindow` configuration (an executable target cannot be
   imported). `PersonaMode` keeps `main.swift`, lifecycle, system adapters and probes.
+
+---
+
+## S-3 — Private CoreGraphics Space Enumeration (`CGSCopyManagedDisplaySpaces`) on macOS 26
+
+### Objective
+Determine whether `CGSMainConnectionID`, `CGSCopyManagedDisplaySpaces`, and `CGSGetActiveSpace` resolve via `dlsym(RTLD_DEFAULT, ...)` on macOS 26.6.2 (Tahoe) and provide reliable workspace indices.
+
+### Observations & Decisions
+- All three symbols resolve cleanly via `dlsym` at runtime on macOS 26.6.2 (`--probe spaces` reports `available: true`, `count: 1`, `active: 1`).
+- **Decision:** Resolve symbols dynamically via `dlsym(RTLD_DEFAULT, ...)` so the binary never hard-links private SPIs, and fall back to a single active workspace pill (`[SpaceInfo(index: 1, isActive: true)]`) if unavailable.
+
+---
+
+## S-4 — Active-Window Border Overlay Level & Z-Order on macOS 26
+
+### Objective
+Evaluate relative window ordering (`order(.above, relativeTo:)`) vs `.floating` window level (`NSWindow.Level.floating`) for the active-window glowing border overlay.
+
+### Observations & Decisions
+- `BorderOverlayWindow` configured with `level = .floating`, `ignoresMouseEvents = true` (hard-locked), `isOpaque = false`, `backgroundColor = .clear`, and `hasShadow = false` renders cleanly above the active application window while remaining below the Persona Top Bar (`.statusBar` = 25) and the Floating Launcher (`popUpMenu - 1` = 100).
+- Setting `shapeLayer.shadowPath = newPath` alongside `shapeLayer.path = newPath` allows the WindowServer (`CARenderServer`) to composite the cyan outer glow in hardware with zero offscreen CPU rasterization overhead.
+- When `AXIsProcessTrusted()` is `false`, `SystemAXWindowProvider` gracefully falls back to `CGWindowListCopyWindowInfo` (normal layer `kCGWindowLayer == 0`) so the border tracker still follows the frontmost window without crashing or prompting.

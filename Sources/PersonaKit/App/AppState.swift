@@ -38,6 +38,8 @@ public final class AppState: ObservableObject {
     @Published public var forcedDarkHour: Bool? = nil
     @Published public var ambientPaused: Bool = false
     @Published public var hintMessage: String? = nil
+    @Published public var axTrusted: Bool = false
+    @Published public var tilingEnabled: Bool = true
 
     public init() {
         updateDarkHourPhase()

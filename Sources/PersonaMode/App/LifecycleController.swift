@@ -18,6 +18,8 @@ public final class LifecycleController {
     public private(set) var windowHost: WindowHostManager?
     public private(set) var config: AppConfig = AppConfig()
     public private(set) var isRunning = false
+    private var exitObserver: NSObjectProtocol?
+    private var ctlObserver: NSObjectProtocol?
 
     public init(
         store: StateStore = StateStore(),
@@ -82,20 +84,43 @@ public final class LifecycleController {
         config = loaded
         for warning in warnings { fputs("config: \(warning)\n", stderr) }
 
+        let trusted = AXPermission.shared.isTrusted
+        AppState.shared.axTrusted = trusted
+        AppState.shared.tilingEnabled = config.tiling.enabled
+
+        // Inject AX window title provider into FocusTracker
+        FocusTracker.shared.titleProvider = AXFocusTitleProvider()
+
         // Start Telemetry & Tracking Services
         TelemetryStore.shared.start()
         FocusTracker.shared.start()
         SpaceProvider.shared.start()
         NowPlayingService.shared.start()
 
+        // Wire CommandRouter handlers
+        wireCommandRouter()
+
         // Wire Quit notification
-        NotificationCenter.default.addObserver(
+        exitObserver = NotificationCenter.default.addObserver(
             forName: NSNotification.Name("dev.persona.mode.exit"),
             object: nil,
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor in
                 self?.exitPersona()
+            }
+        }
+
+        // Wire DistributedNotificationCenter `--ctl <cmd>` channel
+        ctlObserver = DistributedNotificationCenter.default().addObserver(
+            forName: NSNotification.Name("dev.persona.mode.command"),
+            object: nil,
+            queue: .main
+        ) { notif in
+            guard let raw = notif.userInfo?["cmd"] as? String,
+                  let cmd = PersonaCommand.from(string: raw) else { return }
+            Task { @MainActor in
+                CommandRouter.shared.send(cmd)
             }
         }
 
@@ -106,13 +131,94 @@ public final class LifecycleController {
         windowHost = host
         host.start()
 
+        // Start Active-Window Border & Tiling Engine (Phase 4)
+        BorderController.shared.config = config
+        BorderController.shared.start()
+
+        TilingController.shared.config = config
+        TilingController.shared.journal = FrameJournal(supportDir: store.supportDir)
+        if let sys = TilingController.shared.provider as? SystemAXWindowProvider {
+            sys.configFloatApps = config.tiling.floatApps
+        }
+        TilingController.shared.start()
+
+        if trusted {
+            AXWindowObserver.shared.start()
+        }
+
+        AXPermission.shared.startPolling(interval: 1.0) { newTrust in
+            Task { @MainActor in
+                AppState.shared.axTrusted = newTrust
+                if newTrust {
+                    AXWindowObserver.shared.start()
+                } else {
+                    AXWindowObserver.shared.stop()
+                }
+                EventBus.shared.publish(.axTrustChanged(newTrust))
+            }
+        }
+
         // Module teardown runs *after* Dock/Menu Bar/Wallpaper are restored (I5).
         restore.registerModuleStopHook { [weak self] in
             LifecycleController.runOnMain { self?.stopModules() }
         }
     }
 
+    private func wireCommandRouter() {
+        let router = CommandRouter.shared
+        router.onTile = {
+            TilingController.shared.retileAll()
+        }
+        router.onToggleFloat = {
+            TilingController.shared.toggleFloatFocused()
+        }
+        router.onReloadTheme = { [weak self] in
+            self?.reloadTheme()
+        }
+        router.onToggleDarkHour = {
+            AppState.shared.toggleDarkHour()
+        }
+        router.onSwitchSpace = { n in
+            SpaceProvider.shared.switchTo(spaceIndex: n)
+        }
+        router.onExitPersona = { [weak self] in
+            self?.exitPersona()
+        }
+        router.onPanic = { [weak self] in
+            _ = self?.restoreService?.restoreAll(reason: .panic)
+            exit(0)
+        }
+    }
+
+    public func reloadTheme() {
+        let userConfig = store.supportDir.appendingPathComponent("config.json")
+        let (loaded, warnings) = AppConfig.load(userFile: userConfig)
+        config = loaded
+        for warning in warnings { fputs("config: \(warning)\n", stderr) }
+
+        windowHost?.updateConfig(loaded)
+        BorderController.shared.updateConfig(loaded)
+        TilingController.shared.updateConfig(loaded)
+    }
+
     private func stopModules() {
+        if let obs = exitObserver {
+            NotificationCenter.default.removeObserver(obs)
+            exitObserver = nil
+        }
+        if let ctl = ctlObserver {
+            DistributedNotificationCenter.default().removeObserver(ctl)
+            ctlObserver = nil
+        }
+
+        AXPermission.shared.stopPolling()
+        AXWindowObserver.shared.stop()
+
+        TilingController.shared.stop()
+        TilingController.shared.restoreFrames()
+
+        BorderController.shared.stop()
+
         windowHost?.stop()
         windowHost = nil
 

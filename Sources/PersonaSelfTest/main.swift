@@ -11,7 +11,8 @@ let suites: [(name: String, run: (Harness) -> Void)] = [
     ("coords", CoordSuite.run),
     ("windows", WindowSuite.run),
     ("theme", ThemeSuite.run),
-    ("telemetry", TelemetrySuite.run)
+    ("telemetry", TelemetrySuite.run),
+    ("layout", LayoutSuite.run)
 ]
 
 let harness = Harness()
