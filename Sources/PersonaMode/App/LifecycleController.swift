@@ -32,10 +32,9 @@ public final class LifecycleController {
             self.recoveryAdapter = customAdapter
         } else {
             let isDryRun = ProcessInfo.processInfo.environment["PERSONA_DRY_RUN"] == "1"
-            let isPhase1Demo = ProcessInfo.processInfo.environment["PERSONA_PHASE1_DEMO"] == "1"
             let real = RealSystemAdapter()
             self.recoveryAdapter = real
-            if isDryRun || !isPhase1Demo {
+            if isDryRun {
                 self.adapter = DryRunAdapter(underlying: real)
             } else {
                 self.adapter = real
@@ -64,11 +63,8 @@ public final class LifecycleController {
             let mut = SystemMutator(store: store, adapter: adapter, state: state)
             self.mutator = mut
 
-            // If PERSONA_PHASE1_DEMO=1, apply dock & menuBar autohide mutations
-            if ProcessInfo.processInfo.environment["PERSONA_PHASE1_DEMO"] == "1" {
-                try mut.apply(.dockAutohide(true))
-                try mut.apply(.menuBarAutohide(true))
-            }
+            try mut.apply(.dockAutohide(true))
+            try mut.apply(.menuBarAutohide(true))
 
             startWindows(restore: restore)
         } catch {
