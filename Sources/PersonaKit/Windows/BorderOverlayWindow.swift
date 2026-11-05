@@ -70,6 +70,8 @@ public final class BorderOverlayWindow: NSWindow {
         shapeLayer.shadowRadius = 10.0
         shapeLayer.shadowOpacity = 0.85
         shapeLayer.shadowOffset = .zero
+        shapeLayer.shouldRasterize = true
+        shapeLayer.rasterizationScale = NSScreen.main?.backingScaleFactor ?? 2.0
 
         layer.addSublayer(shapeLayer)
         self.contentView = view
@@ -93,6 +95,7 @@ public final class BorderOverlayWindow: NSWindow {
         animated: Bool = true
     ) {
         guard let target = rectAppKit else {
+            guard currentPathRect != nil else { return }
             CATransaction.begin()
             CATransaction.setDisableActions(true)
             shapeLayer.path = nil
@@ -111,11 +114,19 @@ public final class BorderOverlayWindow: NSWindow {
             height: target.height
         )
 
+        guard currentPathRect != localRect else { return }
+
         let newPath = CGPath(
             roundedRect: localRect,
             cornerWidth: cornerRadius,
             cornerHeight: cornerRadius,
             transform: nil
+        )
+        let strokedShadowPath = newPath.copy(
+            strokingWithWidth: borderWidth,
+            lineCap: .round,
+            lineJoin: .round,
+            miterLimit: 10
         )
 
         if animated, let oldRect = currentPathRect, oldRect != localRect {
@@ -129,15 +140,15 @@ public final class BorderOverlayWindow: NSWindow {
         CATransaction.setDisableActions(true)
         shapeLayer.lineWidth = borderWidth
         shapeLayer.path = newPath
-        shapeLayer.shadowPath = newPath
+        shapeLayer.shadowPath = strokedShadowPath
         currentPathRect = localRect
 
         let allowAnim = pulse && ProcessInfo.processInfo.environment["PERSONA_HUD_ANIMATION"] != "0"
         if allowAnim {
             if shapeLayer.animation(forKey: "borderPulse") == nil {
-                let pulseAnim = CABasicAnimation(keyPath: "shadowOpacity")
-                pulseAnim.fromValue = 0.55
-                pulseAnim.toValue = 0.95
+                let pulseAnim = CABasicAnimation(keyPath: "opacity")
+                pulseAnim.fromValue = 0.72
+                pulseAnim.toValue = 1.0
                 pulseAnim.duration = 2.4
                 pulseAnim.autoreverses = true
                 pulseAnim.repeatCount = .infinity

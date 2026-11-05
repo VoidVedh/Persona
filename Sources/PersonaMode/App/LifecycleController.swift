@@ -142,6 +142,9 @@ public final class LifecycleController {
         }
         TilingController.shared.start()
 
+        // Start Global Hotkey Center (Phase 5)
+        _ = HotKeyCenter.shared.registerAll(config: config)
+
         if trusted {
             AXWindowObserver.shared.start()
         }
@@ -178,6 +181,15 @@ public final class LifecycleController {
         router.onToggleDarkHour = {
             AppState.shared.toggleDarkHour()
         }
+        router.onShowLauncher = {
+            LauncherController.shared.show()
+        }
+        router.onHideLauncher = {
+            LauncherController.shared.hide()
+        }
+        router.onToggleLauncher = {
+            LauncherController.shared.toggle()
+        }
         router.onSwitchSpace = { n in
             SpaceProvider.shared.switchTo(spaceIndex: n)
         }
@@ -199,6 +211,7 @@ public final class LifecycleController {
         windowHost?.updateConfig(loaded)
         BorderController.shared.updateConfig(loaded)
         TilingController.shared.updateConfig(loaded)
+        _ = HotKeyCenter.shared.registerAll(config: loaded)
     }
 
     private func stopModules() {
@@ -210,6 +223,9 @@ public final class LifecycleController {
             DistributedNotificationCenter.default().removeObserver(ctl)
             ctlObserver = nil
         }
+
+        HotKeyCenter.shared.unregisterAll()
+        LauncherController.shared.stop()
 
         AXPermission.shared.stopPolling()
         AXWindowObserver.shared.stop()

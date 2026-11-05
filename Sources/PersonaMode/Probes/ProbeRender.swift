@@ -13,8 +13,10 @@ public enum ProbeRender: Probe {
         let targetName = args[0]
         let outPath = args[1]
 
-        let width = CGFloat(ProbeIO.double(of: "--w", in: args, default: 800))
-        let height = CGFloat(ProbeIO.double(of: "--h", in: args, default: 400))
+        let defaultW: CGFloat = (targetName == "launcher") ? 640 : 800
+        let defaultH: CGFloat = (targetName == "launcher") ? 472 : 400
+        let width = CGFloat(ProbeIO.double(of: "--w", in: args, default: Double(defaultW)))
+        let height = CGFloat(ProbeIO.double(of: "--h", in: args, default: Double(defaultH)))
         let scale = CGFloat(ProbeIO.double(of: "--scale", in: args, default: 2.0))
         let notchGap = CGFloat(ProbeIO.double(of: "--notch", in: args, default: 0))
 
@@ -46,6 +48,10 @@ public enum ProbeRender: Probe {
             viewToRender = AnyView(WallpaperView())
         case "border":
             viewToRender = AnyView(BorderPreviewView(width: width, height: height))
+        case "launcher":
+            let query = ProbeIO.string(of: "--query", in: args) ?? ""
+            let vm = LauncherViewModel(initialQuery: query)
+            viewToRender = AnyView(LauncherView(viewModel: vm))
         default:
             fputs("Unknown render target: \(targetName)\n", stderr)
             return 1

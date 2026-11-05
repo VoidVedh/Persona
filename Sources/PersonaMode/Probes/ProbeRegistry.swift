@@ -6,7 +6,8 @@ public enum ProbeRegistry {
     public static let names = [
         "snapshot", "windows", "windows-of", "fonts", "render",
         "telemetry", "focus", "spaces", "nowplaying", "nowplaying-inject",
-        "ax", "windows-ax", "ax-events", "border-state"
+        "ax", "windows-ax", "ax-events", "border-state",
+        "apps", "hotkeys", "launcher-open", "launcher-run"
     ]
 
     /// Runs the named probe; returns `nil` if the name is unknown.
@@ -26,6 +27,10 @@ public enum ProbeRegistry {
         case "windows-ax": return ProbeWindowsAX.run(args: args)
         case "ax-events": return ProbeAXEvents.run(args: args)
         case "border-state": return ProbeBorderState.run(args: args)
+        case "apps": return ProbeApps.run(args: args)
+        case "hotkeys": return ProbeHotkeys.run(args: args)
+        case "launcher-open": return ProbeLauncherOpen.run(args: args)
+        case "launcher-run": return ProbeLauncherRun.run(args: args)
         default: return nil
         }
     }

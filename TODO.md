@@ -324,37 +324,37 @@ Selftests green; PNG renders reviewed; telemetry/nowplaying/spaces probes OK; pe
 
 # PHASE 5 — Global Hotkeys & Floating Launcher (Rofi clone)
 
-- [ ] **P5.1 Fuzzy matcher (Core)**
+- [x] **P5.1 Fuzzy matcher (Core)**
   **Files:** `Sources/PersonaCore/Launcher/FuzzyMatcher.swift`, `Sources/PersonaSelfTest/Suites/FuzzySuite.swift`.
   **Details:** `FuzzyMatcher.score(query:, candidate:) -> (score: Int, matchedIndices: [Int])?` per §8.5 (case-insensitive subsequence; prefix +30; word boundary after space/`-`/`_`/`.` +12; camelCase +8; consecutive +8/char; gap −1/char; `nil` if not a subsequence). `rank(items:query:)` stable sort by score desc, then name.
   **Verify:** `V-TEST fuzzy` — golden: query `saf` ⇒ `Safari` before `Keychain Access`/`System Settings`; `term` ⇒ `Terminal` first; `vsc` ⇒ `Visual Studio Code`; `xyz` ⇒ no matches; empty query ⇒ all in original order; matched indices correct for highlight rendering.
 
-- [ ] **P5.2 App indexer**
+- [x] **P5.2 App indexer**
   **Files:** `Sources/PersonaMode/Launcher/{AppIndexer,LauncherItem}.swift`.
   **Details:** scan the directories in §8.5 (depth ≤ 2, skip `*.app/Contents`), parse `Contents/Info.plist` via `Bundle(url:)`, skip `LSUIElement`/`LSBackgroundOnly` helper apps unless in `/System/Applications`; item `{id (bundle path), name, bundleId, url}`; icons lazy via `NSWorkspace.shared.icon(forFile:)` + `NSCache`. Refresh if any root directory `contentModificationDate` changed since last scan (checked on each launcher open; scan on a background queue; ≤ 300 ms for ~200 apps). `LauncherItem` enum `.app(AppEntry) | .action(ActionEntry)`; `ActionEntry` ids: `tile`, `toggleFloat`, `reloadTheme`, `toggleDarkHour`, `openTerminal`, `openVisualizer` (only if `cava` found), `exitPersona`.
   **Verify:** `swift run PersonaMode --probe apps --query saf --out /tmp/apps.json && plutil -extract count raw -o - /tmp/apps.json && plutil -extract results.0.name raw -o - /tmp/apps.json` → count > 10; first result `Safari`. Also `--query exit` → first result `Exit Persona Mode`.
 
-- [ ] **P5.3 Hotkey center (Carbon)**
+- [x] **P5.3 Hotkey center (Carbon)**
   **Files:** `Sources/PersonaMode/Hotkeys/HotKeyCenter.swift`.
   **Details:** parse chords from config (`"opt+space"`, `"ctrl+opt+cmd+q"`, …) to `(keyCode, carbonModifiers)` using a static table (a–z, 0–9, space, return, escape, arrows); `RegisterEventHotKey(keyCode, mods, EventHotKeyID(signature: OSType("PRSN"), id: n), GetApplicationEventTarget(), 0, &ref)`; single `InstallEventHandler` for `kEventClassKeyboard/kEventHotKeyPressed` dispatching to `CommandRouter`. `registerAll() -> [String: OSStatus]` (failures surfaced in `AppState.hotkeyErrors`). `unregisterAll()` via `UnregisterEventHotKey` (called in restore hook). Panic chord → `CommandRouter.send(.panic)` handled **directly** by `RestoreService.restoreAll(.panic)` then `exit(0)`.
   **Verify:** `swift run PersonaMode --probe hotkeys --out /tmp/hk.json` (registers every configured chord, prints `{chord: status}`, unregisters, asserts `status == 0` — a non-zero for `opt+space` is acceptable *only* if another app owns it; report it) ; `V-BUILD`. **Manual:** `⌥Space` toggles launcher (P5.5).
 
-- [ ] **P5.4 Command router**
+- [x] **P5.4 Command router**
   **Files:** `Sources/PersonaMode/App/CommandRouter.swift`.
   **Details:** `enum PersonaCommand` (§7.1), `CommandRouter.send(_:)` on main; handlers injected: tiling, border, launcher, terminal, lifecycle. `exitPersona` → `NSApp.terminate(nil)`; `panic` → immediate restore + `exit(0)`; `reloadTheme` → re-load config, re-render profiles, rebuild windows (`WindowHostManager.rebuild()`), re-register hotkeys.
   **Verify:** `V-BUILD`.
 
-- [ ] **P5.5 Launcher panel UI**
+- [x] **P5.5 Launcher panel UI**
   **Files:** `Sources/PersonaMode/UI/Launcher/{LauncherPanel,LauncherView,LauncherRow}.swift`, `Sources/PersonaMode/Launcher/LauncherController.swift`.
   **Details:** `LauncherPanel: PersonaPanel` with `canBecomeKey=true`, level `WindowLevels.launcher`, size 640×(56+8·52), centered at 38 % height of the screen under the mouse (`NSEvent.mouseLocation`). Content: `NSVisualEffectView` (`.hudWindow`, `.behindWindow`, `.active`, `maskImage` rounded) + SwiftUI overlay: midnight tint @ 55 %, cyan hairline `AngledPanel` frame, search field (`TextField` with `@FocusState`, placeholder `SEARCH ▸`, display font), result list (max 8 visible, scrolls), selected row = `SkewedPill` cyan fill with `midnight` text; matched characters highlighted. Key handling in a `NSEvent.addLocalMonitorForEvents(.keyDown)` while visible: `↑/↓`, `⌃J/⌃K`, `⌃N/⌃P`, `⏎`, `⌘⏎`, `Esc`, `⌘Q` (→ `exitPersona` confirmation-free), `⌘1…9` quick pick. `LauncherController.toggle()`; closes on `NSWindow.didResignKeyNotification`, after running an item, or Esc. Reset query on show. Fade/scale-in 120 ms (opacity + `transform.scale` 0.98→1).
   **Verify:** `swift run PersonaMode --probe render launcher /tmp/launcher.png --w 640 --h 472 --query saf` → open PNG: skewed highlight on first row, blur not required in offscreen. `swift run PersonaMode --probe launcher-open --out /tmp/lo.json` → `{level:100, canBecomeKey:true, visibleAfterShow:true, visibleAfterEsc:false}` (probe drives `LauncherController` directly with synthetic key input — no AX needed).
 
-- [ ] **P5.6 Item execution**
+- [x] **P5.6 Item execution**
   **Files:** `Sources/PersonaMode/Launcher/LauncherController.swift` (extend).
   **Details:** apps: `NSWorkspace.shared.openApplication(at:configuration:)` (`configuration.activates = true`); `⌘⏎` → `NSWorkspace.shared.activateFileViewerSelecting([url])`; actions → `CommandRouter`. *Exit Persona Mode* row shows a red-tinted style and runs `exitPersona`.
   **Verify:** `swift run PersonaMode --probe launcher-run --item "app:com.apple.calculator"` launches Calculator (then `osascript -e 'tell application "Calculator" to quit'`); `--item "action:exitPersona"` returns exit code 0 and logs `restoreAll(userQuit)`.
 
-- [ ] **P5.7 `--ctl` channel + wiring everything in the lifecycle**
+- [x] **P5.7 `--ctl` channel + wiring everything in the lifecycle**
   **Files:** `Sources/PersonaMode/main.swift`, `Sources/PersonaMode/App/CommandRouter.swift`, `Sources/PersonaMode/App/LifecycleController.swift`.
   **Details:** `PersonaMode --ctl quit|reload|tile|panic|launcher` posts `DistributedNotificationCenter.default().postNotificationName(Notification.Name("dev.persona.mode.command"), object: nil, userInfo: ["cmd": …], deliverImmediately: true)` and exits 0 without creating `NSApplication`. The running app observes and maps to `PersonaCommand`. Lifecycle starts `HotKeyCenter` (registered/unregistered with the session).
   **Verify:** with the app running (dry-run, bundle): `"build/Persona Mode.app/Contents/MacOS/PersonaMode" --ctl tile; echo $?` → 0 and tiling happens (e2e_tiling covers it); `--ctl quit` terminates the app within 3 s (`pgrep -f "Persona Mode"` empty).

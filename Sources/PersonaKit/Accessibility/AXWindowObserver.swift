@@ -24,7 +24,6 @@ public final class AXWindowObserver: @unchecked Sendable {
 
     private let observedNotifications: [String] = [
         kAXWindowCreatedNotification,
-        kAXUIElementDestroyedNotification,
         kAXFocusedWindowChangedNotification,
         kAXMainWindowChangedNotification,
         kAXWindowMovedNotification,
@@ -61,9 +60,20 @@ public final class AXWindowObserver: @unchecked Sendable {
         }
         workspaceObservers.append(termObs)
 
+        let activateObs = center.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notif in
+            guard let app = notif.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else { return }
+            self?.attachObserver(for: app, attempt: 5)
+        }
+        workspaceObservers.append(activateObs)
+
+        let onScreenPIDs = SystemAXWindowProvider.onScreenLayerZeroPIDs()
         for app in NSWorkspace.shared.runningApplications {
-            if app.activationPolicy == .regular {
-                attachObserver(for: app, attempt: 1)
+            if app.activationPolicy == .regular && onScreenPIDs.contains(app.processIdentifier) {
+                attachObserver(for: app, attempt: 5)
             }
         }
     }
@@ -149,6 +159,24 @@ public final class AXWindowObserver: @unchecked Sendable {
         guard pid != ProcessInfo.processInfo.processIdentifier else { return }
 
         let wid = AXPrivate.windowID(for: element)
+
+        if notification == kAXWindowCreatedNotification {
+            let refcon = Unmanaged.passUnretained(self).toOpaque()
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self, let obs = self.observers[pid]?.observer else { return }
+                AXWorker.shared.perform {
+                    _ = AXObserverAddNotification(obs, element, kAXUIElementDestroyedNotification as CFString, refcon)
+                }
+            }
+        }
+
+        if notification == kAXUIElementDestroyedNotification, let id = wid {
+            // Confirm the window is no longer on-screen in WindowServer before broadcasting destruction
+            if let info = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .optionIncludingWindow], id) as? [[String: Any]],
+               !info.isEmpty {
+                return
+            }
+        }
 
         DispatchQueue.main.async {
             switch notification {

@@ -107,14 +107,15 @@ public final class SystemAXWindowProvider: AXWindowProvider {
             return getWindowsViaWindowServer(on: screen)
         }
 
-        // Map CGWindowID -> kCGWindowLayer from WindowServer
-        let windowLayers = currentWindowLayers()
+        // Map CGWindowID -> kCGWindowLayer and active PIDs from WindowServer
+        let (windowLayers, onScreenPIDs) = currentWindowLayersAndPIDs()
         var results: [ManagedWindow] = []
         let ownPID = ProcessInfo.processInfo.processIdentifier
 
         for app in NSWorkspace.shared.runningApplications {
             guard app.activationPolicy == .regular,
                   app.processIdentifier != ownPID,
+                  onScreenPIDs.contains(app.processIdentifier),
                   app.bundleIdentifier != "dev.persona.mode",
                   !app.isHidden else {
                 continue
@@ -131,8 +132,7 @@ public final class SystemAXWindowProvider: AXWindowProvider {
 
             for winElement in windowsList {
                 guard let wid = AXPrivate.windowID(for: winElement) else { continue }
-                let layer = windowLayers[wid] ?? 0
-                guard layer == 0 else { continue }
+                guard let layer = windowLayers[wid], layer == 0 else { continue }
 
                 guard let pos = AXPrivate.copyPointAttribute(element: winElement, attribute: kAXPositionAttribute),
                       let size = AXPrivate.copySizeAttribute(element: winElement, attribute: kAXSizeAttribute) else {
@@ -273,8 +273,9 @@ public final class SystemAXWindowProvider: AXWindowProvider {
     public func setWindowFrame(window: ManagedWindow, frame: CGRect) -> Bool {
         guard AXPermission.shared.isTrusted else { return false }
 
-        if ProcessInfo.processInfo.environment["PERSONA_DRY_RUN"] == "1" &&
-           ProcessInfo.processInfo.environment["PERSONA_TILING_LIVE"] != "1" {
+        let env = ProcessInfo.processInfo.environment
+        if (env["PERSONA_DRY_RUN"] == "1" || env["PERSONA_PHASE1_DEMO"] != nil) &&
+           env["PERSONA_TILING_LIVE"] != "1" {
             return true
         }
 
@@ -317,21 +318,42 @@ public final class SystemAXWindowProvider: AXWindowProvider {
         return nil
     }
 
-    private func currentWindowLayers() -> [CGWindowID: Int] {
+    public static func onScreenLayerZeroPIDs() -> Set<pid_t> {
         guard let windowInfoList = CGWindowListCopyWindowInfo(
             [.optionOnScreenOnly, .excludeDesktopElements],
             kCGNullWindowID
         ) as? [[String: Any]] else {
-            return [:]
+            return []
+        }
+        var pids: Set<pid_t> = []
+        for info in windowInfoList {
+            if let layer = info[kCGWindowLayer as String] as? Int, layer == 0,
+               let pid = info[kCGWindowOwnerPID as String] as? pid_t {
+                pids.insert(pid)
+            }
+        }
+        return pids
+    }
+
+    private func currentWindowLayersAndPIDs() -> (layers: [CGWindowID: Int], pids: Set<pid_t>) {
+        guard let windowInfoList = CGWindowListCopyWindowInfo(
+            [.optionOnScreenOnly, .excludeDesktopElements],
+            kCGNullWindowID
+        ) as? [[String: Any]] else {
+            return ([:], [])
         }
         var map: [CGWindowID: Int] = [:]
+        var pids: Set<pid_t> = []
         for info in windowInfoList {
             if let wid = info[kCGWindowNumber as String] as? CGWindowID,
                let layer = info[kCGWindowLayer as String] as? Int {
                 map[wid] = layer
+                if layer == 0, let pid = info[kCGWindowOwnerPID as String] as? pid_t {
+                    pids.insert(pid)
+                }
             }
         }
-        return map
+        return (map, pids)
     }
 
     private func windowLayer(for wid: CGWindowID) -> Int? {

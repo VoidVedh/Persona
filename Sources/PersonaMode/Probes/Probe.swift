@@ -14,6 +14,10 @@ public enum ProbeIO {
         return args[idx + 1]
     }
 
+    public static func string(of flag: String, in args: [String]) -> String? {
+        value(of: flag, in: args)
+    }
+
     public static func double(of flag: String, in args: [String], default value: Double) -> Double {
         if let raw = Self.value(of: flag, in: args), let parsed = Double(raw) { return parsed }
         return value
