@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <linearGradient id="vinylSheen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050c1a"/>
+      <stop offset="45%" stop-color="#0a192f"/>
+      <stop offset="50%" stop-color="#1f6bff" stop-opacity="0.55"/>
+      <stop offset="55%" stop-color="#0a192f"/>
+      <stop offset="100%" stop-color="#050c1a"/>
+    </linearGradient>
+  </defs>
+  <!-- Outer disc -->
+  <circle cx="60" cy="60" r="54" fill="url(#vinylSheen)" stroke="#00d8ff" stroke-width="2.5"/>
+  <circle cx="60" cy="60" r="47" fill="none" stroke="#e8f6ff" stroke-opacity="0.18" stroke-width="1"/>
+  <circle cx="60" cy="60" r="40" fill="none" stroke="#00d8ff" stroke-opacity="0.28" stroke-width="1.2" stroke-dasharray="18 8"/>
+  <circle cx="60" cy="60" r="33" fill="none" stroke="#e8f6ff" stroke-opacity="0.18" stroke-width="1"/>
+  <circle cx="60" cy="60" r="26" fill="none" stroke="#00d8ff" stroke-opacity="0.35" stroke-width="1.2" stroke-dasharray="12 6"/>
+  <!-- S.E.E.S. center label -->
+  <circle cx="60" cy="60" r="19" fill="#00d8ff" stroke="#ffffff" stroke-width="2"/>
+  <path d="M60 41 A19 19 0 0 1 79 60 L60 60 Z" fill="#ffffff" fill-opacity="0.85"/>
+  <path d="M60 79 A19 19 0 0 1 41 60 L60 60 Z" fill="#0051ff" fill-opacity="0.85"/>
+  <!-- Center spindle hole -->
+  <circle cx="60" cy="60" r="5.5" fill="#050c1a" stroke="#ffffff" stroke-width="1.5"/>
+</svg>

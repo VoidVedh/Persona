@@ -162,32 +162,32 @@
 # PHASE V2.4 — Desktop HUD, layered wallpaper, ambient animation
 **Goal:** the desktop itself looks like the reference, and it *moves* — within the measured budget.
 
-- [ ] **V2.4.1 Wallpaper layers + generator**
+- [x] **V2.4.1 Wallpaper layers + generator**
   **Files:** `Resources/webui/{hud.html,css/hud.css,svg/*}`, `Resources/webui/wallpaper.html` (layers L0–L5, L7–L8 only, no canvas), `scripts/gen_wallpaper.sh`, `Resources/wallpaper/p3r_wallpaper.png`.
   **Details:** §6.6 table exactly: gradient, 6 ocean bands, giant moon + **original** spire silhouette, 4 slashes (`polygon(0 62%,100% 38%,100% 46%,0 70%)`, …), halftone pattern with radial mask, outline typography (`MEMENTO MORI`, `DARK HOUR`), rings, vignette. Static layers `contain: paint`. `gen_wallpaper.sh` renders the PNG from the same HTML (`--probe render webui wallpaper … --w 3840 --h 2160 --scale 1 --freeze 0`).
   **Verify:** `bash scripts/gen_wallpaper.sh && file Resources/wallpaper/p3r_wallpaper.png && ls -l Resources/wallpaper/p3r_wallpaper.png` → 3840×2160, size reported (if > 6 MB, reduce noise per §6.6; do **not** JPEG); `/tmp/v2_wallpaper.png` viewed per protocol.
 
-- [ ] **V2.4.2 Date / time-of-day / moon HUD**
+- [x] **V2.4.2 Date / time-of-day / moon HUD**
   **Files:** `Resources/webui/{css/hud.css,js/{hud,moon}.js,svg/moon-ring.svg}`, `fixtures/hud.{afterschool,darkhour}.json`.
   **Details:** §6.4 A–D: three-layer numerals (`11`, `/`, `05`), `THU` badge, banner with slot animation + accent per slot, moon ring (12-segment dashed ring `r=88 stroke-dasharray 38.07 8`, 6 chambers, ticks, counter-rotating inner ring, phase disc via the §7.2 path algorithm), `NEXT FULL MOON T-xxD xxH` chip + <24 h pulse, Dark Hour recolour (`[data-phase="darkHour"]`). Slot/moon come from Swift (`TimeOfDaySlot`, `MoonPhase`), DOW from `Locale(en_US_POSIX)` uppercase.
   **Verify:** Safari `dev.html` at `p = 0, .25, .5, .75` shows new/first-quarter/full/last-quarter discs.
 
-- [ ] **V2.4.3 Now-Playing HUD + equalizer**
+- [x] **V2.4.3 Now-Playing HUD + equalizer**
   **Files:** `Resources/webui/{css/hud.css,js/eq.js,svg/{vinyl,wings,halftone}.svg}`.
   **Details:** §6.5: `.s-jag` frame with white/ink/face plates, vinyl + wings (original), title marquee only on overflow, artist chip, 28-bar canvas EQ (seeded procedural model, attack .5 / release .12, `data-source="synthetic"`), halftone sweep as a **transform on a static masked layer**, states playing/paused/none.
   **Verify:** unit-style check in `dev.html` toggling the three states; `V-TEST weblint` clean.
 
-- [ ] **V2.4.4 Ambient layers + `PowerStateMonitor` (calm mode)**
+- [x] **V2.4.4 Ambient layers + `PowerStateMonitor` (calm mode)**
   **Files:** `Resources/webui/js/bubbles.js`, `Sources/PersonaKit/App/PowerStateMonitor.swift`, `Sources/PersonaKit/App/AppState.swift` (`ambientPaused` now has a writer), `WebStatePublisher` (`calm`).
   **Details:** §6.6 L6/L7 and §11.1 table: bubbles via `FrameGovernor` (24 fps default, ≤ `hud.particles`), CSS-only rings; `PowerStateMonitor` observes Low Power Mode, battery < 20 % unplugged (existing sampler), display sleep/wake, full-screen frontmost, `thermalState ≥ .serious`; publishes `calm` → `html[data-calm=1]` (rAF stops, CSS animations paused) **and** `AppState.ambientPaused` (legacy engine benefits). Add a pure `CalmPolicy.decide(inputs) -> Bool` in PersonaCore.
   **Verify:** `V-TEST calm` (truth table for every input combination, hysteresis on battery 20↔25 %); manual: toggle Low Power Mode → HUD motion stops within 2 s (note in log).
 
-- [ ] **V2.4.5 Desktop overlay hosts the web HUD; wallpaper modes**
+- [x] **V2.4.5 Desktop overlay hosts the web HUD; wallpaper modes**
   **Files:** `Sources/PersonaKit/Windows/DesktopOverlayWindow.swift`, `Sources/PersonaKit/Web/WebContentFactory.swift` (`makeOverlayContent`), `Sources/PersonaKit/Windows/WindowHostManager.swift`, `Sources/PersonaMode/App/LifecycleController.swift` (system wallpaper path), `Sources/PersonaCore/Lifecycle/*` only if a new ledger case is unavoidable (it should not be — reuse `.tempDir` + `.systemWallpaper`).
   **Details:** §6.6, ADR-V2-6, §8.3 #4. Overlay stays `ignoresMouseEvents == true` (hard lock untouched), level `desktopIcon−1`. `wallpaper.mode == system`: export PNG to `$TMPDIR/PersonaMode/wallpaper/`, apply via the existing mutator, refuse + fall back to overlay when any snapshot is non-restorable; `none` hides the wallpaper layers but keeps widgets. `/wallpaper/current` honours the user drop-in dir (read-only).
   **Verify:** `V-ALL`; `V-TEST mutator restore` unchanged green; `bash scripts/smoke_gui.sh` PASS; with a temp support dir and `PERSONA_DRY_RUN=1` the system-wallpaper path logs the DRYRUN calls and leaves no files after quit.
 
-- [ ] **V2.4.6 Visual gate — HUD, wallpaper, composite**
+- [x] **V2.4.6 Visual gate — HUD, wallpaper, composite**
   **Details:** protocol with the §12.4 **HUD** rubric.
   **Verify:**
   ```bash
@@ -199,7 +199,7 @@
   ```
   View all four; the composite (wallpaper + HUD + top bar) is the "does it look like the reference" check — log it.
 
-- [ ] **V2.4.7 Perf gate with animation on**
+- [x] **V2.4.7 Perf gate with animation on**
   **Verify:** `bash scripts/perf_check.sh 60` (dry-run, AC): total CPU ≤ budget (animated), then with `PERSONA_HUD_ANIMATION=0`/calm ≤ calm budget; RSS ≤ budget. If over: lower `hud.fps`/`particles`, remove a layer, or share work — **record before/after in the log; do not weaken budgets without measured justification.**
 
 ### ✅ Phase V2.4 gate

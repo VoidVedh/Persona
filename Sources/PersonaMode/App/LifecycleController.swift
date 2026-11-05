@@ -83,6 +83,28 @@ public final class LifecycleController {
             try mut.apply(.dockAutohide(true))
             try mut.apply(.menuBarAutohide(true))
 
+            if config.wallpaper.mode == .system {
+                let allRestorable = !state.snapshot.wallpapers.isEmpty && state.snapshot.wallpapers.allSatisfy { $0.isRestorable }
+                if allRestorable,
+                   let resDir = ResourceLocator.resourceDirectory(),
+                   let resolved = WebUIRouter.resolve(path: "/wallpaper/current", resourcesRoot: resDir) {
+                    let tempRoot = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+                        .appendingPathComponent("PersonaMode", isDirectory: true)
+                    let wallDir = tempRoot.appendingPathComponent("wallpaper", isDirectory: true)
+                    let ext = resolved.sourceURL?.pathExtension.isEmpty == false ? resolved.sourceURL!.pathExtension : "png"
+                    let dst = wallDir.appendingPathComponent("p3r_wallpaper.\(ext)")
+                    try mut.apply(.tempDir(path: tempRoot.path))
+                    if AppState.shared.runMode == .live {
+                        try? FileManager.default.createDirectory(at: wallDir, withIntermediateDirectories: true)
+                        try? resolved.data.write(to: dst, options: .atomic)
+                    }
+                    try mut.apply(.systemWallpaper(path: dst.path))
+                } else {
+                    fputs("wallpaper: system mode non-restorable or missing asset; falling back to overlay\n", stderr)
+                    config.wallpaper.mode = .overlay
+                }
+            }
+
             startWindows(restore: restore)
         } catch {
             fputs("LifecycleController start failed: \(error)\n", stderr)
@@ -111,6 +133,7 @@ public final class LifecycleController {
 
         // Start Telemetry & Tracking Services
         TelemetryStore.shared.start()
+        PowerStateMonitor.shared.start(config: config)
         FocusTracker.shared.start()
         SpaceProvider.shared.start()
         NowPlayingService.shared.start()
@@ -232,6 +255,7 @@ public final class LifecycleController {
         for warning in warnings { fputs("config: \(warning)\n", stderr) }
 
         _ = try? ProfileRenderer.shared.render(mutator: mutator)
+        PowerStateMonitor.shared.updateConfig(loaded)
         WebStatePublisher.shared.updateConfig(loaded)
         windowHost?.updateConfig(loaded)
         BorderController.shared.updateConfig(loaded)
@@ -266,6 +290,7 @@ public final class LifecycleController {
         BorderController.shared.stop()
 
         WebStatePublisher.shared.stop()
+        PowerStateMonitor.shared.stop()
         windowHost?.stop()
         windowHost = nil
 

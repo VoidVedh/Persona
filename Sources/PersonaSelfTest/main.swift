@@ -21,7 +21,8 @@ let suites: [(name: String, run: (Harness) -> Void)] = [
     ("webrouter", WebRouterSuite.run),
     ("websurface", WebSurfaceSuite.run),
     ("tokendrift", TokenDriftSuite.run),
-    ("weblint", WebAssetLintSuite.run)
+    ("weblint", WebAssetLintSuite.run),
+    ("calm", CalmSuite.run)
 ]
 
 let harness = Harness()

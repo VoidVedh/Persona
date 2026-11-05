@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120">
+  <!-- Cyan offset back wings -->
+  <polygon points="8,24 62,38 50,58 2,42" fill="#00d8ff" transform="translate(3,3)"/>
+  <polygon points="14,54 58,60 48,78 6,70" fill="#00d8ff" transform="translate(3,3)"/>
+  <polygon points="152,24 98,38 110,58 158,42" fill="#00d8ff" transform="translate(3,3)"/>
+  <polygon points="146,54 102,60 112,78 154,70" fill="#00d8ff" transform="translate(3,3)"/>
+  <!-- Crisp white angular wings with ink stroke -->
+  <polygon points="8,24 62,38 50,58 2,42" fill="#ffffff" stroke="#050c1a" stroke-width="2"/>
+  <polygon points="14,54 58,60 48,78 6,70" fill="#e8f6ff" stroke="#050c1a" stroke-width="2"/>
+  <polygon points="152,24 98,38 110,58 158,42" fill="#ffffff" stroke="#050c1a" stroke-width="2"/>
+  <polygon points="146,54 102,60 112,78 154,70" fill="#e8f6ff" stroke="#050c1a" stroke-width="2"/>
+</svg>

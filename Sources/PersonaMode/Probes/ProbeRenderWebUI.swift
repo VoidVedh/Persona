@@ -244,10 +244,60 @@ public enum ProbeRenderWebUI {
             at: url.deletingLastPathComponent(),
             withIntermediateDirectories: true
         )
+        let imageToWrite: CGImage
+        if cgImage.width * cgImage.height >= 3840 * 2160,
+           let denoised = denoiseHighResPNG(cgImage) {
+            imageToWrite = denoised
+        } else {
+            imageToWrite = cgImage
+        }
         guard let dest = CGImageDestinationCreateWithURL(url as CFURL, "public.png" as CFString, 1, nil) else {
             return false
         }
-        CGImageDestinationAddImage(dest, cgImage, nil)
+        CGImageDestinationAddImage(dest, imageToWrite, nil)
         return CGImageDestinationFinalize(dest)
+    }
+
+    /// Removes 2-bit LSB CoreGraphics gradient dither noise on 4K exports so lossless PNG deflate stays < 5 MB (§6.6).
+    private static func denoiseHighResPNG(_ src: CGImage) -> CGImage? {
+        let w = src.width
+        let h = src.height
+        let bpr = w * 4
+        var buf = [UInt8](repeating: 0, count: h * bpr)
+        guard let cs = CGColorSpace(name: CGColorSpace.sRGB) else { return nil }
+        let bitmapInfo = CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue
+        let drawn: Bool = buf.withUnsafeMutableBytes { rawPtr in
+            guard let base = rawPtr.baseAddress,
+                  let ctx = CGContext(
+                      data: base,
+                      width: w,
+                      height: h,
+                      bitsPerComponent: 8,
+                      bytesPerRow: bpr,
+                      space: cs,
+                      bitmapInfo: bitmapInfo
+                  ) else { return false }
+            ctx.draw(src, in: CGRect(x: 0, y: 0, width: w, height: h))
+            return true
+        }
+        guard drawn else { return nil }
+        for i in stride(from: 0, to: buf.count, by: 4) {
+            buf[i] &= 0xF8
+            buf[i + 1] &= 0xF8
+            buf[i + 2] &= 0xF8
+        }
+        return buf.withUnsafeMutableBytes { rawPtr in
+            guard let base = rawPtr.baseAddress,
+                  let ctx = CGContext(
+                      data: base,
+                      width: w,
+                      height: h,
+                      bitsPerComponent: 8,
+                      bytesPerRow: bpr,
+                      space: cs,
+                      bitmapInfo: bitmapInfo
+                  ) else { return nil }
+            return ctx.makeImage()
+        }
     }
 }

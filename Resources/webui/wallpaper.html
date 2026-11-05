@@ -6,11 +6,63 @@
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/shapes.css">
+  <link rel="stylesheet" href="css/hud.css">
 </head>
 <body data-surface="wallpaper" data-fixture="hud.afterschool" data-autoboot="1">
-  <div id="wallpaper-root"></div>
+  <div id="wallpaper-root">
+    <!-- Static Wallpaper Layers L0–L5, L7–L8 (§6.6) -->
+    <div id="wp-stage" class="wp-stage" data-mode="overlay">
+      <div class="wp-l0"></div>
+
+      <svg class="wp-l1" viewBox="0 0 1600 500" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0,180 C320,120 640,240 960,160 C1240,90 1440,210 1600,150 L1600,500 L0,500 Z" fill="var(--cyan)" fill-opacity="0.08"/>
+        <path d="M0,230 C280,290 620,150 940,230 C1220,300 1420,180 1600,220 L1600,500 L0,500 Z" fill="var(--cyan)" fill-opacity="0.11"/>
+        <path d="M0,280 C360,210 700,330 1040,260 C1300,200 1480,290 1600,250 L1600,500 L0,500 Z" fill="var(--cyan)" fill-opacity="0.14" stroke="var(--cyan-hi)" stroke-opacity="0.35" stroke-width="2"/>
+        <path d="M0,330 C300,380 660,260 1000,340 C1280,390 1460,310 1600,340 L1600,500 L0,500 Z" fill="var(--cyan)" fill-opacity="0.16"/>
+        <path d="M0,380 C380,330 740,420 1100,370 C1340,330 1500,400 1600,375 L1600,500 L0,500 Z" fill="var(--azure)" fill-opacity="0.22" stroke="var(--white)" stroke-opacity="0.28" stroke-width="1.5"/>
+        <path d="M0,430 C340,460 720,390 1080,435 C1320,465 1490,415 1600,435 L1600,500 L0,500 Z" fill="var(--ink)" fill-opacity="0.65"/>
+      </svg>
+
+      <div class="wp-l2">
+        <div class="wp-moon-disc"></div>
+        <svg class="wp-spire-svg" viewBox="0 0 600 800" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+          <polygon points="180,800 235,360 365,360 420,800" fill="#050c1a" stroke="var(--cyan)" stroke-opacity="0.38" stroke-width="2"/>
+          <polygon points="215,520 255,210 345,210 385,520" fill="#050c1a" stroke="var(--cyan)" stroke-opacity="0.48" stroke-width="2"/>
+          <polygon points="258,280 286,70 314,70 342,280" fill="#050c1a" stroke="var(--white)" stroke-opacity="0.55" stroke-width="2"/>
+          <polygon points="292,90 300,12 308,90" fill="var(--cyan)"/>
+          <polygon points="140,800 210,560 245,560 195,800" fill="#0a192f" stroke="var(--cyan)" stroke-opacity="0.3" stroke-width="1.5"/>
+          <polygon points="460,800 390,560 355,560 405,800" fill="#0a192f" stroke="var(--cyan)" stroke-opacity="0.3" stroke-width="1.5"/>
+          <rect x="220" y="340" width="160" height="8" fill="var(--cyan)" fill-opacity="0.75"/>
+          <rect x="246" y="200" width="108" height="6" fill="var(--white)" fill-opacity="0.8"/>
+        </svg>
+      </div>
+
+      <div class="wp-l3">
+        <div class="wp-slash wp-slash--4"></div>
+        <div class="wp-slash wp-slash--3"></div>
+        <div class="wp-slash wp-slash--2"></div>
+        <div class="wp-slash wp-slash--1"></div>
+        <div class="wp-slash wp-slash--1-edge"></div>
+      </div>
+
+      <div class="wp-l4"></div>
+
+      <div class="wp-l5">
+        <div class="wp-outline-word wp-outline-word--top">MEMENTO MORI</div>
+        <div class="wp-outline-word wp-outline-word--bottom">DARK HOUR</div>
+        <div class="wp-tech-tag wp-tech-tag--tl">PORT ISLAND // SECTOR 04 · 34.6697° N, 135.2145° E</div>
+        <div class="wp-tech-tag wp-tech-tag--br">TARTARUS // 0:00 · S.E.E.S. FIELD OVERLAY</div>
+      </div>
+
+      <div class="wp-l7">
+        <div class="wp-ring wp-ring--outer"></div>
+        <div class="wp-ring wp-ring--inner"></div>
+      </div>
+
+      <div class="wp-l8"></div>
+    </div>
+  </div>
   <script src="js/fixtures.js"></script>
   <script src="js/bridge.js"></script>
 </body>
 </html>
-

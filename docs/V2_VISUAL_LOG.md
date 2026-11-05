@@ -79,3 +79,29 @@ This document records the visual inspection gate (`OVERHAUL_ARCHITECTURE.md §12
   - [x] **Visible two-tone glow (cyan near, royal blue far):** `glowInnerLayer` (`#00d8ff`, radius 6) and `glowOuterLayer` (`#0051ff`, radius 18) produce a bright cyan core halo transitioning into a deep royal-blue outer aura.
   - [x] **White corner ticks:** `ticksLayer` renders four `3.5×3.5` `#ffffff` square ticks just outside the 4 bracket corners.
   - [x] **Ring sits outside the dummy window edge (no overlap with its content):** The synthetic window (`#0a192f` body + `#050c1a` titlebar) is clipped inside `targetWinFrameAppKit` while the border ring is outset by `borderWidth / 2`, leaving the window interior completely untouched.
+
+
+---
+
+## 3. Desktop HUD, Layered Wallpaper & Composite (`v2_hud.png`, `v2_hud_darkhour.png`, `v2_wallpaper.png`, `v2_composite.png` — Phase V2.4)
+
+### Iteration 1 → 2 Refinement
+- **Iteration 1 Findings:** `cyanPct` on `/tmp/v2_hud.png` was `6.92%` (below the `>= 8%` rubric bound because `.wp-slash--1` used a royal-blue midpoint gradient), `Resources/wallpaper/p3r_wallpaper.png` was `9.2 MB` due to 2-bit LSB CoreGraphics gradient dither noise at 3840×2160, and `moon-countdown` in Dark Hour (`FULL // DARK HOUR`) wrapped onto two lines inside the 128×30 chip.
+- **Iteration 2 Fixes:** Changed `.wp-slash--1` to solid `var(--cyan)` at `opacity: 0.94` (`cyanPct` rose to `13.60%`), wired `moon.countdown` (`T-05D 14H` in daytime, `FULL MOON` in Dark Hour) cleanly on a single line, and stripped 3-bit LSB dither noise on 4K exports so `Resources/wallpaper/p3r_wallpaper.png` compresses losslessly to `2.8 MB` (3840×2160 RGBA PNG).
+
+### `png-stats` Output (Iteration 2 — Accepted)
+- **`/tmp/v2_hud.png` (1512×982):** `{"alphaCoveragePct": 100.0, "cyanPct": 13.6, "navyPct": 44.84, "whitePct": 2.39}` (Rubric bounds: `cyanPct >= 8%`, `navyPct >= 25%` — **PASS**)
+- **`/tmp/v2_hud_darkhour.png` (1512×982):** `{"alphaCoveragePct": 100.0, "cyanPct": 12.78, "navyPct": 48.87, "whitePct": 2.14}` — **PASS**
+- **`/tmp/v2_wallpaper.png` (1512×982):** `{"alphaCoveragePct": 100.0, "cyanPct": 12.45, "navyPct": 41.5, "whitePct": 0.39}` — **PASS**
+- **`/tmp/v2_composite.png` (1512×982):** `{"alphaCoveragePct": 100.0, "cyanPct": 13.99, "navyPct": 43.71, "whitePct": 2.64}` — **PASS**
+
+### §12.4 HUD & Wallpaper Rubric Checklist
+- [x] **Date numerals read `11 / 05`, three visible layers (white / navy outline / cyan back):** `11` (150px Bebas) and `05` (240px Bebas) render with `#ffffff` face, 10px `#050c1a` stroke mid-layer at `(5px, 5px)`, and `#00d8ff` back copy at `(10px, 10px)` separated by a 220px skewed cyan `/`.
+- [x] **`THU` badge overlaps numerals, tilted:** 112×38 `.s-para` white badge with `#050c1a` text and `(5px, 5px)` cyan backing plate sits at `rotate(-4deg)` overlapping the bottom-right of `05`.
+- [x] **Banner reads `AFTER SCHOOL` (fixture 16:30):** 420×52 `.s-tab-right` navy banner with 3px white top border, 2px cyan bottom border, and `▸ AFTER SCHOOL` in 36px Bebas Neue.
+- [x] **Moon ring with 12 notched segments + 6 chambers + phase disc:** `moon-ring.svg` renders the 12-segment outer cylinder (`r=88`, `stroke-dasharray="38.07 8"`), 6 revolver chambers (`r=14`), 24 outer degree ticks, counter-rotating inner ring, and the waxing gibbous (`p=0.32`) terminator-ellipse SVG `<path>` computed by `moon.js`.
+- [x] **`NEXT FULL MOON T-xxD xxH` chip:** 128×30 `.s-para` chip beneath the moon ring displays `NEXT FULL MOON` and `T-05D 14H` (`FULL MOON` in Dark Hour).
+- [x] **Now-playing: jagged white back plate offset ≥ 5 px, vinyl, wings, title, artist chip, equalizer bars with different heights:** Bottom-left 460×176 `.s-jag` frame displays a 6px white offset plate, 3px ink mid-plate, navy face with cyan inner polygon border, 112px grooved vinyl + 140px angular wings, `COLOR YOUR NIGHT`, cyan parallelogram chip `AZUMI TAKAHASHI · LOTUS JUICE`, and 28 seeded equalizer bars with 25% mirrored reflection.
+- [x] **Wallpaper shows ocean bands, giant moon, ≥ 3 diagonal slashes, halftone, outline typography:** L0–L8 render 6 sine-wave ocean bands, 44vmin radial moon + original angular Tartarus spire silhouette, 4 diagonal slashes (`#00d8ff` with crisp white upper edge), radial-masked halftone dot matrix, `MEMENTO MORI` / `DARK HOUR` 2px stroke typography, rising specular bubbles, and rotating HUD rings.
+- [x] **Nothing overlaps the top-bar zone (top 50 px of HUD content region empty of widgets):** All HUD widgets start below `y = 66px`, leaving the 44px top bar completely unobstructed in `/tmp/v2_composite.png`.
+- [x] **Dark Hour variant is clearly teal-green:** `/tmp/v2_hud_darkhour.png` shifts all slashes, moon disc, revolver ring, date back-plates, and equalizer bars to Tartarus emerald (`#00ff88` / `#5dffcf` / `#042420`).
