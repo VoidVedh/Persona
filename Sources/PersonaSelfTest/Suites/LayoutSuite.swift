@@ -268,9 +268,9 @@ public enum LayoutSuite {
         let tiledIDs = Set(mockProvider.setFrameCalls.map(\.id))
         t.expectEqual(tiledIDs, Set([501, 502]), "self-PID, non-zero layer, minimized, hidden, and tiny popups excluded")
 
-        let expectedMinTop = cfg.topBar.marginTop + 38 + cfg.tiling.gaps.outer
+        let expectedMinTop = cfg.topBar.marginTop + max(38, cfg.topBar.height) + cfg.tiling.gaps.outer
         for call in mockProvider.setFrameCalls {
-            t.expect(call.frame.minY >= expectedMinTop, "tiled window \(call.id) reserves 38pt top bar + outer gap (minY=\(call.frame.minY) >= \(expectedMinTop))")
+            t.expect(call.frame.minY >= expectedMinTop, "tiled window \(call.id) reserves top bar + outer gap (minY=\(call.frame.minY) >= \(expectedMinTop))")
         }
 
         // Test 3: FrameJournal recorded pre-tile frames and restores them cleanly

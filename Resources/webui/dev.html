@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Persona Mode V2 — Dev Harness</title>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/shapes.css">
+  <style>
+    body { background: #050c1a; padding: 16px; overflow: auto; }
+    .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; font-family: "Rajdhani", sans-serif; }
+    .toolbar button, .toolbar select {
+      background: #0a192f; color: #00d8ff; border: 1px solid #00d8ff; padding: 6px 12px;
+      font-family: "Rajdhani", sans-serif; font-weight: 700; cursor: pointer;
+    }
+    iframe { border: 1px dashed rgba(0, 216, 255, 0.35); display: block; margin-bottom: 18px; background: transparent; }
+  </style>
+</head>
+<body data-surface="dev" data-autoboot="1">
+  <div class="toolbar">
+    <span>PERSONA V2 DEV HARNESS</span>
+    <select id="fixture-select">
+      <option value="bar.default">bar.default</option>
+      <option value="bar.notch">bar.notch</option>
+      <option value="bar.darkhour">bar.darkhour</option>
+      <option value="bar.dryrun">bar.dryrun</option>
+      <option value="hud.afterschool">hud.afterschool</option>
+      <option value="hud.darkhour">hud.darkhour</option>
+      <option value="launcher.default">launcher.default</option>
+      <option value="launcher.query-saf">launcher.query-saf</option>
+      <option value="launcher.exit-selected">launcher.exit-selected</option>
+    </select>
+    <button id="btn-phase" type="button">TOGGLE DARK HOUR</button>
+    <button id="btn-calm" type="button">TOGGLE CALM</button>
+  </div>
+  <iframe id="frame-topbar" src="topbar.html?fixture=bar.default" width="1512" height="44"></iframe>
+  <iframe id="frame-launcher" src="launcher.html?fixture=launcher.default" width="980" height="560"></iframe>
+  <iframe id="frame-hud" src="hud.html?fixture=hud.afterschool" width="1512" height="982"></iframe>
+  <script src="js/fixtures.js"></script>
+  <script src="js/bridge.js"></script>
+</body>
+</html>
+

@@ -8,7 +8,8 @@ public enum ProbeRegistry {
         "telemetry", "focus", "spaces", "nowplaying", "nowplaying-inject",
         "ax", "windows-ax", "ax-events", "border-state",
         "apps", "hotkeys", "launcher-open", "launcher-run",
-        "gen-terminal-profile", "profiles", "rice", "terminal-detect", "statusbar", "ctl"
+        "gen-terminal-profile", "profiles", "rice", "terminal-detect", "statusbar", "ctl",
+        "web-transparency", "png-stats", "gen-tokens"
     ]
 
     /// Runs the named probe; returns `nil` if the name is unknown.
@@ -37,6 +38,9 @@ public enum ProbeRegistry {
         case "terminal-detect": return ProbeTerminalDetect.run(args: args)
         case "statusbar": return ProbeStatusBar.run(args: args)
         case "ctl": return ProbeCtl.run(args: args)
+        case "web-transparency": return ProbeWebTransparency.run(args: args)
+        case "png-stats": return ProbePNGStats.run(args: args)
+        case "gen-tokens": return ProbeGenTokens.run(args: args)
         default: return nil
         }
     }

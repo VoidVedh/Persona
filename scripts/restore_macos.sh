@@ -208,6 +208,19 @@ fi
 if [ -d "/tmp/PersonaMode" ]; then
     run rm -rf "/tmp/PersonaMode"
 fi
+for wk_path in \
+    "$HOME/Library/WebKit/dev.persona.mode" \
+    "$HOME/Library/WebKit/PersonaMode" \
+    "$HOME/Library/Caches/dev.persona.mode" \
+    "$HOME/Library/Caches/PersonaMode" \
+    "$HOME/Library/HTTPStorages/dev.persona.mode" \
+    "$HOME/Library/HTTPStorages/dev.persona.mode.binarycookies" \
+    "$HOME/Library/HTTPStorages/PersonaMode" \
+    "$HOME/Library/Saved Application State/dev.persona.mode.savedState"; do
+    if [ -e "$wk_path" ]; then
+        run rm -rf "$wk_path"
+    fi
+done
 run rm -f "$SUPPORT_DIR/state.json"
 run rm -f "$SUPPORT_DIR/state.json.tmp"
 run rm -f "$SUPPORT_DIR/state.json.prev"

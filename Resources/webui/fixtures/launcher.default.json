@@ -1,0 +1,99 @@
+{
+  "calm" : false,
+  "items" : [
+    {
+      "destructive" : false,
+      "id" : "cmd.showcase",
+      "kind" : "CMD",
+      "matchIndices" : [
+
+      ],
+      "name" : "LAUNCH P3R SHOWCASE WORKSPACE",
+      "shortcut" : "⌘1",
+      "subtitle" : "Spawn dual-terminal fastfetch + audio/system visualizer"
+    },
+    {
+      "destructive" : false,
+      "id" : "cmd.terminal",
+      "kind" : "CMD",
+      "matchIndices" : [
+
+      ],
+      "name" : "OPEN TERMINAL (P3R)",
+      "shortcut" : "⌘2",
+      "subtitle" : "Launch isolated Persona 3 Reload terminal session"
+    },
+    {
+      "destructive" : false,
+      "id" : "cmd.tile",
+      "kind" : "CMD",
+      "matchIndices" : [
+
+      ],
+      "name" : "TILE WINDOWS",
+      "shortcut" : "⌘3",
+      "subtitle" : "Retile all windows on active display"
+    },
+    {
+      "destructive" : false,
+      "id" : "cmd.darkhour",
+      "kind" : "CMD",
+      "matchIndices" : [
+
+      ],
+      "name" : "TOGGLE DARK HOUR",
+      "shortcut" : "⌘4",
+      "subtitle" : "Switch between Daytime Cyan and Dark Hour Emerald"
+    },
+    {
+      "destructive" : false,
+      "iconId" : "safari",
+      "id" : "app.safari",
+      "kind" : "APP",
+      "matchIndices" : [
+
+      ],
+      "name" : "SAFARI",
+      "shortcut" : "⌘5",
+      "subtitle" : "/Applications/Safari.app"
+    },
+    {
+      "destructive" : false,
+      "iconId" : "terminal",
+      "id" : "app.terminal",
+      "kind" : "APP",
+      "matchIndices" : [
+
+      ],
+      "name" : "TERMINAL",
+      "shortcut" : "⌘6",
+      "subtitle" : "/System/Applications/Utilities/Terminal.app"
+    },
+    {
+      "destructive" : false,
+      "id" : "cmd.float",
+      "kind" : "CMD",
+      "matchIndices" : [
+
+      ],
+      "name" : "TOGGLE FLOAT",
+      "shortcut" : "⌘7",
+      "subtitle" : "Float or unfloat the focused window"
+    },
+    {
+      "destructive" : true,
+      "id" : "cmd.exit",
+      "kind" : "EXIT",
+      "matchIndices" : [
+
+      ],
+      "name" : "EXIT PERSONA MODE",
+      "shortcut" : "⌘8",
+      "subtitle" : "Restore macOS Dock, Menu Bar, and window frames"
+    }
+  ],
+  "phase" : "daytime",
+  "query" : "",
+  "selectedIndex" : 0,
+  "totalCount" : 8
+}

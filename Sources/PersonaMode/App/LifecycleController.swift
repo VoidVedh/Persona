@@ -142,7 +142,7 @@ public final class LifecycleController {
             }
         }
 
-        let factory = PersonaContentFactory(onQuit: { [weak self] in
+        let factory = WebContentFactory(onQuit: { [weak self] in
             self?.exitPersona()
         })
         let host = WindowHostManager(config: config, factory: factory)
@@ -232,6 +232,7 @@ public final class LifecycleController {
         for warning in warnings { fputs("config: \(warning)\n", stderr) }
 
         _ = try? ProfileRenderer.shared.render(mutator: mutator)
+        WebStatePublisher.shared.updateConfig(loaded)
         windowHost?.updateConfig(loaded)
         BorderController.shared.updateConfig(loaded)
         TilingController.shared.updateConfig(loaded)
@@ -264,6 +265,7 @@ public final class LifecycleController {
 
         BorderController.shared.stop()
 
+        WebStatePublisher.shared.stop()
         windowHost?.stop()
         windowHost = nil
 

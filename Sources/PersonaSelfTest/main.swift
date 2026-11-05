@@ -14,7 +14,14 @@ let suites: [(name: String, run: (Harness) -> Void)] = [
     ("telemetry", TelemetrySuite.run),
     ("layout", LayoutSuite.run),
     ("fuzzy", FuzzySuite.run),
-    ("launchoptions", LaunchOptionsSuite.run)
+    ("launchoptions", LaunchOptionsSuite.run),
+    ("timeofday", TimeOfDaySuite.run),
+    ("moonphase", MoonPhaseSuite.run),
+    ("webstate", WebStateSuite.run),
+    ("webrouter", WebRouterSuite.run),
+    ("websurface", WebSurfaceSuite.run),
+    ("tokendrift", TokenDriftSuite.run),
+    ("weblint", WebAssetLintSuite.run)
 ]
 
 let harness = Harness()

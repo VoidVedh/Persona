@@ -1,9 +1,14 @@
 {
+  "ui": {
+    "engine": "web",
+    "debugInspector": false
+  },
   "wallpaper": {
-    "mode": "overlay"
+    "mode": "overlay",
+    "image": "bundled"
   },
   "topBar": {
-    "height": 34,
+    "height": 44,
     "marginTop": 6,
     "marginSide": 10,
     "level": "statusBar"
@@ -11,7 +16,13 @@
   "hud": {
     "primaryScreenOnly": true,
     "ambientAnimation": true,
-    "fps": 30
+    "fps": 24,
+    "particles": 28,
+    "calmOnBattery": true
+  },
+  "launcher": {
+    "width": 980,
+    "height": 560
   },
   "tiling": {
     "enabled": true,
@@ -30,10 +41,19 @@
   },
   "border": {
     "enabled": true,
+    "style": "p3r",
     "width": 3,
     "cornerRadius": 16,
+    "bracketLength": 28,
     "color": "#00d8ff",
     "pulse": true
+  },
+  "sound": {
+    "enabled": true,
+    "volume": 0.35
+  },
+  "showcase": {
+    "closeOnExit": false
   },
   "terminal": {
     "preference": [
@@ -49,6 +69,8 @@
     "tile": "ctrl+opt+t",
     "toggleFloat": "ctrl+opt+f",
     "terminal": "ctrl+opt+return",
+    "showcase": "ctrl+opt+s",
+    "mute": "ctrl+opt+m",
     "panic": "ctrl+opt+cmd+q",
     "space1": "ctrl+opt+1",
     "space2": "ctrl+opt+2",

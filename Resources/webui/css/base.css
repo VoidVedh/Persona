@@ -1,0 +1,48 @@
+@font-face {
+  font-family: "Bebas Neue";
+  src: url("persona://app/fonts/BebasNeue-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Rajdhani";
+  src: url("persona://app/fonts/Rajdhani-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Rajdhani";
+  src: url("persona://app/fonts/Rajdhani-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  font-family: "Rajdhani", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--ice);
+  -webkit-font-smoothing: antialiased;
+}
+
+html[data-calm="1"] *,
+html[data-calm="1"] *::before,
+html[data-calm="1"] *::after {
+  animation-play-state: paused !important;
+}
+

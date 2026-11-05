@@ -96,6 +96,8 @@ public final class WindowHostManager {
     public func stop() {
         removeObservers()
         for (_, entry) in entries {
+            (entry.bar.contentView as? WebSurfaceView)?.teardown()
+            (entry.overlay.contentView as? WebSurfaceView)?.teardown()
             entry.bar.orderOut(nil)
             entry.overlay.orderOut(nil)
             entry.bar.contentView = nil

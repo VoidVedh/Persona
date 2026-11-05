@@ -6,8 +6,14 @@ import SwiftUI
 
 public enum ProbeRender: Probe {
     public static func run(args: [String]) -> Int32 {
+        if let first = args.first, first == "webui" {
+            return ProbeRenderWebUI.run(args: Array(args.dropFirst()))
+        }
+        if let first = args.first, first == "composite" {
+            return ProbeRenderWebUI.runComposite(args: Array(args.dropFirst()))
+        }
         guard args.count >= 2 else {
-            fputs("Usage: --probe render <shapes|topbar|hud|wallpaper|border|launcher> <out.png> [--w W] [--h H] [--scale S] [--notch N] [--query Q]\n", stderr)
+            fputs("Usage: --probe render <webui|composite|shapes|topbar|hud|wallpaper|border|launcher> <out.png> [--w W] [--h H] [--scale S] [--notch N] [--query Q]\n", stderr)
             return 1
         }
         let targetName = args[0]

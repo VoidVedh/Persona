@@ -1,0 +1,150 @@
+/* Persona 3 Reload Geometric Shape Kit (§5.4, §6.2)
+ * RULE: Never combine `filter` and `clip-path` in the same CSS rule (R-V2-4).
+ * Wrapper carries `filter: drop-shadow(...)`; inner layers carry `clip-path: polygon(...)`.
+ */
+
+.s-para {
+  --sk: 10px;
+  clip-path: polygon(var(--sk) 0, 100% 0, calc(100% - var(--sk)) 100%, 0 100%);
+}
+
+.s-para-r {
+  --sk: 10px;
+  clip-path: polygon(0 0, calc(100% - var(--sk)) 0, 100% 100%, var(--sk) 100%);
+}
+
+.s-chamfer {
+  --c: 8px;
+  clip-path: polygon(
+    var(--c) 0,
+    100% 0,
+    100% calc(100% - var(--c)),
+    calc(100% - var(--c)) 100%,
+    0 100%,
+    0 var(--c)
+  );
+}
+
+.s-tab-right {
+  --c: 22px;
+  clip-path: polygon(0 0, 100% 0, calc(100% - var(--c)) 100%, 0 100%);
+}
+
+.s-bar {
+  clip-path: polygon(0 0, 100% 0, 100% 70%, calc(100% - 28px) 100%, 28px 100%, 0 70%);
+}
+
+.s-jag {
+  clip-path: polygon(
+    0% 8%, 3% 0%, 9% 5%, 15% 0%, 22% 4%, 30% 0%, 38% 5%, 46% 0%,
+    55% 4%, 63% 0%, 72% 5%, 81% 0%, 90% 4%, 97% 0%, 100% 9%,
+    98% 22%, 100% 36%, 97% 50%, 100% 64%, 98% 78%, 100% 92%,
+    94% 100%, 85% 95%, 76% 100%, 66% 96%, 56% 100%, 46% 95%,
+    36% 100%, 26% 96%, 16% 100%, 7% 95%, 0% 100%, 3% 86%,
+    0% 72%, 2% 58%, 0% 44%, 3% 30%, 0% 18%
+  );
+}
+
+.s-tri-right {
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+/* Pattern 5.4a: Wrapper filter + triple offset clipped plates */
+.plate {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  --ox-back: 4px;
+  --oy-back: 4px;
+  --ox-mid: 2px;
+  --oy-mid: 2px;
+  filter: drop-shadow(0 0 6px rgb(0 216 255 / 0.55));
+}
+
+.plate--lg {
+  --ox-back: 6px;
+  --oy-back: 6px;
+  --ox-mid: 3px;
+  --oy-mid: 3px;
+  filter: drop-shadow(0 0 8px rgb(0 216 255 / 0.6)) drop-shadow(0 0 22px rgb(0 81 255 / 0.45));
+}
+
+.plate--sm {
+  --ox-back: 3px;
+  --oy-back: 3px;
+  --ox-mid: 1.5px;
+  --oy-mid: 1.5px;
+  filter: drop-shadow(0 0 5px rgb(0 216 255 / 0.45));
+}
+
+.plate__back,
+.plate__mid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.plate__back {
+  background: var(--cyan);
+  transform: translate(var(--ox-back), var(--oy-back));
+  z-index: 0;
+}
+
+.plate__mid {
+  background: var(--ink);
+  transform: translate(var(--ox-mid), var(--oy-mid));
+  z-index: 1;
+}
+
+.plate__face {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: var(--white);
+  color: var(--ink);
+}
+
+/* Pattern 5.4b: 3-layer outline text without paint-order */
+.p3-outline {
+  position: relative;
+  display: inline-block;
+  font-family: "Bebas Neue", sans-serif;
+  font-variant-numeric: tabular-nums;
+  line-height: 0.82;
+  letter-spacing: -0.02em;
+  color: var(--white);
+  --tx-back: 10px;
+  --ty-back: 10px;
+  --tx-mid: 5px;
+  --ty-mid: 5px;
+  --stroke-w: 10px;
+}
+
+.p3-outline::before,
+.p3-outline::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.p3-outline::before {
+  color: var(--cyan);
+  transform: translate(var(--tx-back), var(--ty-back));
+  z-index: -2;
+}
+
+.p3-outline::after {
+  color: var(--ink);
+  -webkit-text-stroke: var(--stroke-w) var(--ink);
+  transform: translate(var(--tx-mid), var(--ty-mid));
+  z-index: -1;
+}
+

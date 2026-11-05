@@ -31,11 +31,11 @@ enum CoordSuite {
             t.expectEqual(above.origin.y, -1440, "display above primary has negative AX y")
             t.expectEqual(CoordinateSpace.flip(CGPoint(x: 5, y: 10), primaryHeight: H), CGPoint(x: 5, y: 972), "flip point")
 
-            // --- Bar frame math (non-notched) ---
+            // --- Bar frame math (non-notched, V2 default height = 44) ---
             let cfg = TopBarConfig()
             let plain = CGRect(x: 0, y: 0, width: 1920, height: 1080)
             let bar = WindowGeometry.barFrame(screenFrame: plain, safeTop: 0, config: cfg)
-            t.expectEqual(bar, CGRect(x: 10, y: 1040, width: 1900, height: 34), "bar frame on plain 1080p display")
+            t.expectEqual(bar, CGRect(x: 10, y: 1030, width: 1900, height: 44), "bar frame on plain 1080p display")
             t.expect(bar.maxY == plain.maxY - cfg.marginTop, "bar top sits marginTop below screen top")
 
             // --- Bar frame on a secondary display with negative origin ---
@@ -50,8 +50,8 @@ enum CoordSuite {
             t.expectEqual(WindowGeometry.barHeight(configHeight: 34, safeTop: 32), 34, "config height wins when taller than notch")
             t.expectEqual(WindowGeometry.barHeight(configHeight: 34, safeTop: 38), 38, "notch inset wins when taller than config")
             let notchBar = WindowGeometry.barFrame(screenFrame: mbp, safeTop: 38, config: cfg)
-            t.expectEqual(notchBar.height, 38, "notch bar height")
-            t.expectEqual(notchBar.minY, 982 - 6 - 38, "notch bar y")
+            t.expectEqual(notchBar.height, 44, "notch bar height (config 44 >= safeTop 38)")
+            t.expectEqual(notchBar.minY, 982 - 6 - 44, "notch bar y")
 
             // --- Cluster split around the notch ---
             let auxLeft = CGRect(x: 0, y: 944, width: 650, height: 38)
@@ -65,7 +65,7 @@ enum CoordSuite {
 
             // --- Overlay + reserved edge ---
             t.expectEqual(WindowGeometry.overlayFrame(screenFrame: secondary), secondary, "overlay covers the full screen frame")
-            t.expectEqual(WindowGeometry.reservedTopEdge(barFrame: bar), 1040, "reserved edge is the bar's bottom")
+            t.expectEqual(WindowGeometry.reservedTopEdge(barFrame: bar), 1030, "reserved edge is the bar's bottom")
 
             // --- Width never negative on absurd configs ---
             var tiny = TopBarConfig()

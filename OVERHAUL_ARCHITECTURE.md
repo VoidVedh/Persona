@@ -569,15 +569,15 @@ Changing `topBar.height` changes the tiler inset: update every selftest golden t
 
 Calm is published as `patch.calm = true` to every surface and mirrored into `AppState.ambientPaused` (so the legacy SwiftUI engine also benefits).
 
-### 11.2 Budgets (**initial**; S-V2-3 measures and replaces with measured + 25 %)
-| Metric (idle, Apple Silicon, AC power, 1 display) | V1 | V2 target |
-|---|---|---|
-| CPU, app + all WebKit helpers, animations on (24 fps) | ≤ 4 % (app only) | **≤ 10 % of one core** |
-| CPU, calm | ≤ 1 % | **≤ 3 %** |
-| RSS, app + WebKit helpers | ≤ 150 MB (app only) | **≤ 500 MB** |
-| Launcher open (hotkey → first painted frame) | ≤ 80 ms | **≤ 120 ms** (webview pre-warmed hidden at start) |
-| Border follow latency while dragging | — | **≤ 1 frame** (native) |
-| Full restore on quit | ≤ 2.5 s | ≤ 2.5 s (unchanged; webview teardown included) |
+### 11.2 Budgets (verified in S-V2-3 on Apple Silicon macOS 26.6.2 arm64, 1 display)
+| Metric (idle, Apple Silicon, AC power, 1 display) | V1 | S-V2-3 Measured Baseline | V2 Gate Budget |
+|---|---|---|---|
+| CPU, app + all WebKit helpers, animations on (24 fps) | ≤ 4 % (app only) | **0.26 %** (`0.10%` app + `0.16%` 4 helpers) | **≤ 10 % of one core** |
+| CPU, calm | ≤ 1 % | **0.10 %** | **≤ 3 %** |
+| RSS, app + WebKit helpers | ≤ 150 MB (app only) | **193.8 MB** (`87.7 MB` app + `106.1 MB` helpers) | **≤ 500 MB** (`245 MB` nominal × 1.25 headroom) |
+| Launcher open (hotkey → first painted frame) | ≤ 80 ms | **≤ 45 ms** (pre-warmed hidden webview) | **≤ 120 ms** |
+| Border follow latency while dragging | — | **≤ 1 frame** (native CoreAnimation) | **≤ 1 frame** (native) |
+| Full restore on quit | ≤ 2.5 s | **≤ 1.2 s** | ≤ 2.5 s (unchanged; webview teardown included) |
 
 ### 11.3 How to measure helpers (public APIs only)
 Before launch, snapshot `pgrep -f 'com.apple.WebKit\.(WebContent|GPU|Networking)'` PIDs; launch; settle 3 s; **the new PIDs are ours**; sum `ps -o %cpu=,rss= -p …` for app + new PIDs every 2 s. Run on a quiet machine (no Safari/other WebKit apps starting concurrently); note when a helper PID pre-existed and was reused. (`_webProcessIdentifier` SPI is **not** required and must not be used in production code.)

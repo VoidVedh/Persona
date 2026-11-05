@@ -40,7 +40,7 @@ enum WindowSuite {
         t.expect(!bar.canBecomeKey, "bar: canBecomeKey == false")
         t.expect(!bar.canBecomeMain, "bar: canBecomeMain == false")
         t.expect(!bar.ignoresMouseEvents, "bar: accepts clicks")
-        t.expectEqual(bar.frame, CGRect(x: 10, y: 942, width: 1492, height: 34), "bar: frame on 1512x982")
+        t.expectEqual(bar.frame, CGRect(x: 10, y: 932, width: 1492, height: 44), "bar: frame on 1512x982")
 
         // Configured level is honored
         var alt = cfg.topBar
@@ -78,7 +78,7 @@ enum WindowSuite {
             auxRight: CGRect(x: 862, y: 944, width: 650, height: 38), isPrimary: true
         )
         let notchBar = TopBarPanel(screen: notched, config: cfg.topBar, content: NSView())
-        t.expectEqual(notchBar.frame.height, 38, "notch: bar height grows to safe inset")
+        t.expectEqual(notchBar.frame.height, max(cfg.topBar.height, notched.safeTop), "notch: bar height is max(config.height, safeTop)")
         t.expectEqual(notchBar.clusterSplit?.gap, 212, "notch: cluster gap")
         t.expect(notched.hasNotch && !primary.hasNotch, "notch: hasNotch flags")
 
@@ -93,7 +93,7 @@ enum WindowSuite {
         t.expect(manager.isRunning, "manager: running after start")
         let e1 = manager.entries[9101]
         let e2 = manager.entries[9102]
-        t.expectEqual(e1?.bar.frame, CGRect(x: 10, y: 942, width: 1492, height: 34), "manager: primary bar frame")
+        t.expectEqual(e1?.bar.frame, CGRect(x: 10, y: 932, width: 1492, height: 44), "manager: primary bar frame")
         t.expectEqual(e2?.bar.frame.origin.x, -1910, "manager: secondary bar honors negative origin")
         t.expect(e1?.overlay.ignoresMouseEvents == true && e2?.overlay.ignoresMouseEvents == true, "manager: every overlay is click-through")
 
@@ -101,7 +101,7 @@ enum WindowSuite {
         screens[0] = screen(id: 9101, frame: CGRect(x: 0, y: 0, width: 1920, height: 1080), primary: true)
         NotificationCenter.default.post(name: NSApplication.didChangeScreenParametersNotification, object: nil)
         RunLoop.main.run(until: Date().addingTimeInterval(0.25))
-        t.expectEqual(manager.entries[9101]?.bar.frame, CGRect(x: 10, y: 1040, width: 1900, height: 34), "manager: bar resized after resolution change")
+        t.expectEqual(manager.entries[9101]?.bar.frame, CGRect(x: 10, y: 1030, width: 1900, height: 44), "manager: bar resized after resolution change")
         t.expectEqual(manager.entries[9101]?.overlay.frame, CGRect(x: 0, y: 0, width: 1920, height: 1080), "manager: overlay resized after resolution change")
         t.expect(manager.entries[9101] === e1, "manager: window pair reused (not recreated) on resize")
 
@@ -116,7 +116,7 @@ enum WindowSuite {
         NotificationCenter.default.post(name: NSApplication.didChangeScreenParametersNotification, object: nil)
         RunLoop.main.run(until: Date().addingTimeInterval(0.25))
         t.expectEqual(manager.entries.count, 2, "manager: windows created for hot-plugged display")
-        t.expectEqual(manager.entries[9103]?.bar.frame, CGRect(x: 1930, y: 1400, width: 2540, height: 34), "manager: hot-plugged display bar frame")
+        t.expectEqual(manager.entries[9103]?.bar.frame, CGRect(x: 1930, y: 1390, width: 2540, height: 44), "manager: hot-plugged display bar frame")
 
         // Teardown: stop() closes everything and unsubscribes from notifications.
         manager.stop()

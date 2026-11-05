@@ -34,7 +34,7 @@ public enum ConfigSuite {
                 let partialConfig = try JSONDecoder().decode(AppConfig.self, from: data)
                 t.expectEqual(partialConfig.tiling.gaps.outer, 20, "partial outer gap is overridden")
                 t.expectEqual(partialConfig.tiling.gaps.inner, 10, "partial inner gap maintains default")
-                t.expectEqual(partialConfig.topBar.height, 34, "unmentioned topBar maintains default")
+                t.expectEqual(partialConfig.topBar.height, 44, "unmentioned topBar maintains default")
             } catch {
                 t.fail("Failed to decode partial JSON: \(error)")
             }
@@ -62,8 +62,27 @@ public enum ConfigSuite {
             // Lower bound clamp test
             var lowerClampConfig = AppConfig()
             lowerClampConfig.tiling.splitRatio = 0.05
+            lowerClampConfig.hud.fps = 5
+            lowerClampConfig.hud.particles = -5
+            lowerClampConfig.border.bracketLength = 8
+            lowerClampConfig.sound.volume = -0.2
             _ = lowerClampConfig.validateAndClamp()
             t.expectEqual(lowerClampConfig.tiling.splitRatio, 0.2, "splitRatio clamped to 0.2")
+            t.expectEqual(lowerClampConfig.hud.fps, 12, "hud.fps clamped to 12")
+            t.expectEqual(lowerClampConfig.hud.particles, 0, "hud.particles clamped to 0")
+            t.expectEqual(lowerClampConfig.border.bracketLength, 16, "border.bracketLength clamped to 16")
+            t.expectEqual(lowerClampConfig.sound.volume, 0.0, "sound.volume clamped to 0.0")
+
+            var upperClampConfig = AppConfig()
+            upperClampConfig.hud.fps = 120
+            upperClampConfig.hud.particles = 200
+            upperClampConfig.border.bracketLength = 90
+            upperClampConfig.sound.volume = 2.5
+            _ = upperClampConfig.validateAndClamp()
+            t.expectEqual(upperClampConfig.hud.fps, 30, "hud.fps clamped to 30")
+            t.expectEqual(upperClampConfig.hud.particles, 48, "hud.particles clamped to 48")
+            t.expectEqual(upperClampConfig.border.bracketLength, 48, "border.bracketLength clamped to 48")
+            t.expectEqual(upperClampConfig.sound.volume, 1.0, "sound.volume clamped to 1.0")
         }
     }
 }

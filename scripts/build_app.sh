@@ -16,13 +16,15 @@ if [ ! -f "Resources/profiles/terminal-app/Persona3Reload.terminal" ]; then
     "$BIN" --probe gen-terminal-profile --out "Resources/profiles/terminal-app/Persona3Reload.terminal" >/dev/null
 fi
 
-APP_DIR="$REPO_DIR/build/Persona Mode.app"
+FINAL_APP_DIR="$REPO_DIR/build/Persona Mode.app"
+STAGE_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/personamode_app_stage.XXXXXX")"
+trap 'rm -rf "$STAGE_ROOT"' EXIT
+APP_DIR="$STAGE_ROOT/Persona Mode.app"
 CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
 RES_DIR="$CONTENTS_DIR/Resources"
 
-rm -rf "$APP_DIR"
-mkdir -p "$MACOS_DIR" "$RES_DIR/fonts" "$RES_DIR/profiles" "$RES_DIR/scripts"
+mkdir -p "$MACOS_DIR" "$RES_DIR/fonts" "$RES_DIR/profiles" "$RES_DIR/scripts" "$RES_DIR/webui" "$RES_DIR/wallpaper"
 
 cp "$BIN" "$MACOS_DIR/PersonaMode"
 chmod +x "$MACOS_DIR/PersonaMode"
@@ -32,6 +34,12 @@ if [ -d "Resources/fonts" ]; then
 fi
 if [ -d "Resources/profiles" ]; then
     cp -R Resources/profiles/. "$RES_DIR/profiles/"
+fi
+if [ -d "Resources/webui" ]; then
+    cp -R Resources/webui/. "$RES_DIR/webui/"
+fi
+if [ -d "Resources/wallpaper" ]; then
+    cp -R Resources/wallpaper/. "$RES_DIR/wallpaper/"
 fi
 
 cp scripts/restore_macos.sh "$RES_DIR/scripts/restore_macos.sh"
@@ -50,8 +58,13 @@ else
     echo "      Run 'bash scripts/setup_signing.sh' if you want stable TCC Accessibility identity across rebuilds."
 fi
 
+xattr -cr "$APP_DIR" 2>/dev/null || true
 codesign --force --deep --sign "$IDENTITY" --identifier dev.persona.mode "$APP_DIR"
 codesign --verify --deep --strict "$APP_DIR"
 
-echo "Built and verified: $APP_DIR"
+mkdir -p "$REPO_DIR/build"
+rm -rf "$FINAL_APP_DIR"
+ditto "$APP_DIR" "$FINAL_APP_DIR"
+
+echo "Built and verified: $FINAL_APP_DIR"
 

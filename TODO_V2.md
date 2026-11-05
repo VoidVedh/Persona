@@ -65,47 +65,47 @@
 # PHASE V2.2 — Web foundation (spikes, host, scheme handler, bridge, core models)
 **Goal:** a transparent, zero-trace, locked-down `WKWebView` pipeline you can render deterministically to PNG — before any pretty UI is written.
 
-- [ ] **V2.2.1 Spike S-V2-1 — transparent WKWebView on this macOS**
+- [x] **V2.2.1 Spike S-V2-1 — transparent WKWebView on this macOS**
   **Files:** temporary `Sources/PersonaMode/Probes/ProbeWebTransparency.swift` (`--probe web-transparency`), result in `docs/SPIKE_RESULTS.md`.
   **Details:** R-V2-1. Create a borderless non-opaque window (`.clear`) at a known on-screen rect over a *known solid backdrop window* (orange, a second `NSWindow`); host a `WKWebView` (nonPersistent) loading an inline HTML page with a half-transparent cyan square and `html{background:transparent}`. Read back pixel colours by snapshotting **both** (or by `takeSnapshot` of the web view and inspecting alpha at a known corner). Test the 3 configurations: `drawsBackground=false`; `underPageBackgroundColor=.clear` only; both. Record which work. Implement the ordered fallbacks of R-V2-1 and the **runtime self-check** used by ADR-V2-9 (`WebTransparencyCheck.passes() -> Bool`).
   **Verify:** probe prints `{drawsBackgroundKVC:Bool, underPage:Bool, alphaAtCorner:Double, chosen:"…"}`; `docs/SPIKE_RESULTS.md` has an `S-V2-1` section with the chosen mechanism and the exact macOS build. Remove the probe afterwards or keep it documented in Appendix A.
 
-- [ ] **V2.2.2 Spike S-V2-2 — headless snapshot (`render webui`) + `png-stats`**
+- [x] **V2.2.2 Spike S-V2-2 — headless snapshot (`render webui`) + `png-stats`**
   **Files:** `Sources/PersonaMode/Probes/ProbeRenderWebUI.swift`, extend `ProbeRegistry`/`ProbeRender` dispatch (`args[0] == "webui"`), `Sources/PersonaMode/Probes/ProbePNGStats.swift`.
   **Details:** §12.1. Probe loads `persona://app/<surface>.html?fixture=<n>&freeze=<ms>&seed=<n>` in an off-screen window, waits (RunLoop pump, 8 s timeout, non-zero exit on timeout) for `document.documentElement.dataset.ready == "1"` (poll via `evaluateJavaScript`), then `takeSnapshot(with:)` honouring `--scale`, writes a PNG **with alpha**. Try the capture strategies of R-V2-2 in order until a non-blank image results; record the winner. `png-stats <png>` prints `{w,h,alphaCoveragePct,bbox,cyanPct,whitePct,navyPct}` (tolerance ±24 per channel).
   **Verify:** with a throwaway `Resources/webui/dev-smoke.html` (solid 100×100 cyan square on transparent bg) `render webui` produces a PNG whose `png-stats` shows `alphaCoveragePct ≈ square area ± 2` and `cyanPct ≈ 100 of opaque`; `docs/SPIKE_RESULTS.md` `S-V2-2` records the winning capture method. Delete `dev-smoke.html`.
 
-- [ ] **V2.2.3 `WebUIRouter` + `WebUISchemeHandler`**
+- [x] **V2.2.3 `WebUIRouter` + `WebUISchemeHandler`**
   **Files:** `Sources/PersonaKit/Web/WebUIRouter.swift`, `…/WebUISchemeHandler.swift`, `Sources/PersonaSelfTest/Suites/WebRouterSuite.swift`.
   **Details:** §4.4. Pure `resolve(path:root:userDirs:)`; MIME table (`html css js svg png jpg jpeg webp heic→image/heic ttf json`); CSP header on HTML; `/wallpaper/current`, `/art/banner` (user dir precedence, read-only), `/icon/<id>.png` backed by an `IconCache` (`NSCache`). Handler implements `start`/`stop` correctly (cancel in-flight tasks).
   **Verify:** `V-TEST webrouter` — rejects `..`, `%2e%2e`, `\`, NUL, absolute paths, symlink escaping the root, sibling-prefix dirs (`webui-evil/…` must not match root `webui/`); correct MIME; user-art precedence; 404 for unknown ext; icon route never exposes a path.
 
-- [ ] **V2.2.4 `WebSurfaceView` (host, lock-down, teardown)**
+- [x] **V2.2.4 `WebSurfaceView` (host, lock-down, teardown)**
   **Files:** `Sources/PersonaKit/Web/WebSurfaceView.swift`, `Sources/PersonaKit/Web/WeakScriptHandler.swift`, `Sources/PersonaSelfTest/Suites/WebSurfaceSuite.swift`.
   **Details:** §4.2 verbatim: nonPersistent store, scheme handler, navigation lock (only `persona://app`), no context menu, no magnification, no back/forward gestures, `acceptsFirstResponder=false`, `acceptsFirstMouse` per `interactive`, `isInspectable` in debug or `PERSONA_WEBUI_DEBUG=1`. Teardown func in the exact §3.2 order. Weak-proxy script handler.
   **Verify:** `V-TEST websurface` — construct (no navigation): `websiteDataStore.isPersistent == false`, `value(forKey:"drawsBackground") as? Bool == false` (or the S-V2-1 chosen mechanism), handler deinit proven with a weak reference after `teardown()`.
 
-- [ ] **V2.2.5 `WebBridge` + typed intents + ready handshake**
+- [x] **V2.2.5 `WebBridge` + typed intents + ready handshake**
   **Files:** `Sources/PersonaKit/Web/WebBridge.swift`, `Resources/webui/js/bridge.js`.
   **Details:** §4.3. Swift→JS via `callAsyncJavaScript` with structured `arguments` (no string-built JS); patches queued until `ready`; JS→Swift whitelist decoding to `WebIntent`, origin check (`persona` scheme), unknown → drop. `bridge.js`: `window.persona = {state, onState(fn), dispatch(patch), post(type,payload), freeze(ms), fixture(name)}`, shallow-merge patches, `ready` after `document.fonts.load` of every face + first `requestAnimationFrame`, sets `data-ready`, implements `?freeze/&seed/&fixture`, **FrameGovernor** (single rAF, cap fps, `data-calm` support), `mulberry32`.
   **Verify:** `V-TEST websurface` extended with a pure `WebIntent.decode` table test (valid/invalid/oversized payloads, wrong scheme) and a patch-queue test; Safari `dev.html` (V2.2.7) shows state merging.
 
-- [ ] **V2.2.6 PersonaCore models: `TimeOfDaySlot`, `MoonPhase`, `WebState`**
+- [x] **V2.2.6 PersonaCore models: `TimeOfDaySlot`, `MoonPhase`, `WebState`**
   **Files:** `Sources/PersonaCore/Theme/{TimeOfDaySlot,MoonPhase}.swift`, `Sources/PersonaCore/Web/WebState.swift`, suites `TimeOfDaySuite`, `MoonPhaseSuite`, `WebStateSuite`.
   **Details:** §7.1–7.3 exactly (table, formulas, 8 bins, golden dates, tolerance 0.75 d). `WebState` Codable with sorted-key encoder; golden JSON fixtures stored as Swift string literals **and** mirrored in `Resources/webui/fixtures/*.json` (the suite asserts the files decode and re-encode identically).
   **Verify:** `V-TEST timeofday moonphase webstate` — every boundary minute of §7.1; `MoonPhase` new moon 2024-01-11 11:57 UTC and full moon 2024-01-25 17:54 UTC within tolerance; `toFull ∈ (0, 29.53]` over 1000 random dates; fixtures round-trip.
 
-- [ ] **V2.2.7 `Resources/webui` skeleton, tokens, fonts, dev harness**
+- [x] **V2.2.7 `Resources/webui` skeleton, tokens, fonts, dev harness**
   **Files:** `Resources/webui/{topbar,hud,launcher,dev}.html`, `css/{tokens,base,shapes}.css`, `js/{bridge,fixtures}.js`, `Sources/PersonaMode/Probes/ProbeGenTokens.swift`, `Sources/PersonaSelfTest/Suites/{TokenDriftSuite,WebAssetLintSuite}.swift`, `ThemeTokens.swift` (web-only tokens).
   **Details:** §5. `tokens.css` generated from `ThemeTokens` (`--probe gen-tokens`), all §6.1 tokens, `@font-face` for Bebas Neue / Rajdhani via `persona://app/fonts/…`. `shapes.css` = §6.2 classes + the plate recipe (pattern 5.4a) + 3-layer outline-text recipe (5.4b). Pages are empty shells that signal `ready`. `dev.html` per §5.5.
   **Verify:** `V-TEST tokendrift weblint` — drift = fail; lint fails on `innerHTML`, `http://`/`https://` literals, `eval(`, `new Function`, remote `url(`, and any CSS rule containing both `filter` and `clip-path`.
 
-- [ ] **V2.2.8 Engine switch + factory + packaging of web assets**
+- [x] **V2.2.8 Engine switch + factory + packaging of web assets**
   **Files:** `Sources/PersonaCore/Config/AppConfig.swift` (`ui.engine`), `Sources/PersonaKit/Web/WebContentFactory.swift`, `Sources/PersonaKit/App/PersonaContentFactory.swift` (fallback), `scripts/build_app.sh`, `config/default-config.json`, `ConfigSuite`.
   **Details:** §3, ADR-V2-9, §5.1, §10.1. `WebContentFactory: WindowContentFactory` returns a `WebSurfaceView` per surface (stub pages for now); choose factory by `ui.engine`, and auto-fall back to the SwiftUI factory if `WebTransparencyCheck` fails (log + status-menu hint `UI: SwiftUI fallback`). `build_app.sh` copies `webui/` and `wallpaper/` (create the dir with a `.gitkeep` until V2.4). Clamp/validate all §10.1 keys.
   **Verify:** `V-TEST config`; `make app && ls "build/Persona Mode.app/Contents/Resources"` shows `webui`; `open -W -n "build/Persona Mode.app" --args --probe fonts --out /tmp/f.json && cat /tmp/f.json` → both faces `true` **from the bundle** (this also clears the carry-over P6.6 verification debt).
 
-- [ ] **V2.2.9 Spike S-V2-3 — baseline cost of 3 transparent webviews + trace scan**
+- [x] **V2.2.9 Spike S-V2-3 — baseline cost of 3 transparent webviews + trace scan**
   **Files:** `scripts/perf_check.sh` (helper accounting §11.3), `docs/SPIKE_RESULTS.md`.
   **Details:** With three **empty** `ready` surfaces running (dry-run bundle, 60 s): record app+helper CPU/RSS using the PID-diff method of §11.3; count helper processes. Then run once and check the residue paths of §12.5 after quit. Replace the *initial* budgets in §11.2 with **measured × 1.25** (edit `OVERHAUL_ARCHITECTURE.md` §11.2 and note the machine).
   **Verify:** `bash scripts/perf_check.sh 60` prints separate `app`, `webkit helpers`, `total` lines; residue paths absent (`ls ~/Library/WebKit/dev.persona.mode ~/Library/Caches/dev.persona.mode 2>&1 | grep -c "No such"` = 2) — if present, implement the scoped cleanup of §12.5 and record it.

@@ -1,0 +1,34 @@
+{
+  "calm" : false,
+  "day" : "05",
+  "dow" : "THU",
+  "fps" : 24,
+  "month" : "11",
+  "moon" : {
+    "countdown" : "T-05D 14H",
+    "illum" : 0.71,
+    "name" : "Waxing Gibbous",
+    "p" : 0.32,
+    "toFullDays" : 5.58,
+    "under24h" : false
+  },
+  "nowPlaying" : {
+    "artist" : "AZUMI TAKAHASHI · LOTUS JUICE",
+    "source" : "Music",
+    "state" : "playing",
+    "title" : "COLOR YOUR NIGHT"
+  },
+  "particles" : 28,
+  "phase" : "daytime",
+  "screen" : {
+    "height" : 982,
+    "notch" : {
+      "w" : 0,
+      "x" : 0
+    },
+    "width" : 1512
+  },
+  "slot" : "AFTER SCHOOL",
+  "slotAccent" : "--cyan",
+  "wallpaperMode" : "overlay"
+}

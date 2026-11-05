@@ -64,6 +64,12 @@ public final class StatusBarController: NSObject, NSMenuDelegate {
         header.isEnabled = false
         m.addItem(header)
 
+        if AppState.shared.usingSwiftUIFallback {
+            let fallbackItem = NSMenuItem(title: "UI: SwiftUI fallback", action: nil, keyEquivalent: "")
+            fallbackItem.isEnabled = false
+            m.addItem(fallbackItem)
+        }
+
         m.addItem(.separator())
 
         let launcherItem = NSMenuItem(

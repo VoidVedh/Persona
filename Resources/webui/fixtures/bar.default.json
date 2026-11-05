@@ -1,0 +1,60 @@
+{
+  "calm" : false,
+  "clockDay" : "THU 05",
+  "clockTime" : "16:30",
+  "focusedApp" : "TERMINAL",
+  "focusedTitle" : "zsh — fastfetch · p3r-rice",
+  "nowPlaying" : {
+    "artist" : "AZUMI TAKAHASHI · LOTUS JUICE",
+    "source" : "Music",
+    "state" : "playing",
+    "title" : "COLOR YOUR NIGHT"
+  },
+  "phase" : "daytime",
+  "runMode" : "live",
+  "screen" : {
+    "height" : 44,
+    "notch" : {
+      "w" : 0,
+      "x" : 0
+    },
+    "width" : 1512
+  },
+  "slot" : "AFTER SCHOOL",
+  "spaces" : [
+    {
+      "active" : true,
+      "index" : 1,
+      "occupied" : true
+    },
+    {
+      "active" : false,
+      "index" : 2,
+      "occupied" : true
+    },
+    {
+      "active" : false,
+      "index" : 3,
+      "occupied" : true
+    },
+    {
+      "active" : false,
+      "index" : 4,
+      "occupied" : false
+    },
+    {
+      "active" : false,
+      "index" : 5,
+      "occupied" : false
+    }
+  ],
+  "telemetry" : {
+    "battery" : 84,
+    "charging" : true,
+    "cpu" : 18,
+    "mem" : 46,
+    "muted" : false,
+    "volume" : 65,
+    "wifiBars" : 4
+  }
+}

@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Persona Mode — Shape Kit Contact Sheet</title>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/shapes.css">
+  <style>
+    .sheet {
+      width: 876px;
+      height: 496px;
+      margin: 12px;
+      background: var(--midnight);
+      padding: 24px 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      position: relative;
+      border: 2px solid var(--cyan);
+      clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
+    }
+    .sheet__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid rgb(0 216 255 / 0.35);
+      padding-bottom: 10px;
+    }
+    .sheet__title {
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 32px;
+      letter-spacing: 0.12em;
+      color: var(--white);
+    }
+    .sheet__sub {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--cyan);
+    }
+    .sheet__row {
+      display: flex;
+      align-items: center;
+      gap: 26px;
+      flex-wrap: wrap;
+    }
+    .demo-pill {
+      width: 150px;
+      height: 42px;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 22px;
+      letter-spacing: 0.08em;
+    }
+    .demo-bar {
+      width: 420px;
+      height: 42px;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 20px;
+      letter-spacing: 0.12em;
+    }
+    .demo-jag {
+      width: 280px;
+      height: 120px;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 28px;
+      letter-spacing: 0.08em;
+    }
+    .demo-jag .plate__back {
+      background: var(--white);
+      transform: translate(6px, 6px);
+    }
+    .demo-jag .plate__mid {
+      background: var(--ink);
+      transform: translate(3px, 3px);
+    }
+    .demo-jag .plate__face {
+      background: var(--midnight);
+      color: var(--white);
+      border: 2px solid var(--cyan);
+    }
+    .demo-date {
+      position: relative;
+      width: 340px;
+      height: 170px;
+      filter: drop-shadow(0 0 18px rgb(0 81 255 / 0.55));
+    }
+    .demo-date__m {
+      position: absolute;
+      left: 10px;
+      top: 18px;
+      font-size: 120px;
+      transform: rotate(-6deg);
+    }
+    .demo-date__s {
+      position: absolute;
+      left: 112px;
+      top: -6px;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 165px;
+      color: var(--cyan);
+      transform: skewX(-12deg);
+    }
+    .demo-date__d {
+      position: absolute;
+      left: 156px;
+      top: 26px;
+      font-size: 172px;
+      transform: rotate(-6deg);
+    }
+  </style>
+</head>
+<body data-surface="shapes" data-autoboot="1">
+  <div class="sheet">
+    <div class="sheet__header">
+      <span class="sheet__title">PERSONA 3 RELOAD // V2 GEOMETRIC SHAPE KIT</span>
+      <span class="sheet__sub">WRAPPER-FILTER + INNER-CLIP + 3-LAYER OUTLINE</span>
+    </div>
+
+    <div class="sheet__row">
+      <div class="plate demo-pill">
+        <i class="plate__back s-para" style="--sk:12px"></i>
+        <i class="plate__mid s-para" style="--sk:12px"></i>
+        <span class="plate__face s-para" style="--sk:12px">S-PARA SLANT</span>
+      </div>
+
+      <div class="plate demo-pill">
+        <i class="plate__back s-para-r" style="--sk:12px"></i>
+        <i class="plate__mid s-para-r" style="--sk:12px"></i>
+        <span class="plate__face s-para-r" style="--sk:12px">S-PARA-R</span>
+      </div>
+
+      <div class="plate demo-pill">
+        <i class="plate__back s-chamfer" style="--c:10px"></i>
+        <i class="plate__mid s-chamfer" style="--c:10px"></i>
+        <span class="plate__face s-chamfer" style="--c:10px">S-CHAMFER</span>
+      </div>
+
+      <div class="plate demo-pill">
+        <i class="plate__back s-tab-right" style="--c:18px"></i>
+        <i class="plate__mid s-tab-right" style="--c:18px"></i>
+        <span class="plate__face s-tab-right" style="--c:18px">S-TAB-RIGHT</span>
+      </div>
+
+      <div class="plate" style="width:32px;height:36px">
+        <i class="plate__back s-tri-right"></i>
+        <span class="plate__face s-tri-right" style="background:var(--alert)"></span>
+      </div>
+    </div>
+
+    <div class="sheet__row">
+      <div class="plate demo-bar">
+        <i class="plate__back s-bar"></i>
+        <i class="plate__mid s-bar"></i>
+        <span class="plate__face s-bar" style="background:var(--abyss);color:var(--cyan)">S-BAR CHAMFERED TOP STRIP</span>
+      </div>
+    </div>
+
+    <div class="sheet__row" style="justify-content: space-between">
+      <div class="plate plate--lg demo-jag">
+        <i class="plate__back s-jag"></i>
+        <i class="plate__mid s-jag"></i>
+        <span class="plate__face s-jag">S-JAG COMIC FRAME</span>
+      </div>
+
+      <div class="demo-date">
+        <span class="p3-outline demo-date__m" data-text="11">11</span>
+        <span class="demo-date__s">/</span>
+        <span class="p3-outline demo-date__d" data-text="05">05</span>
+      </div>
+    </div>
+  </div>
+  <script src="js/fixtures.js"></script>
+  <script src="js/bridge.js"></script>
+</body>
+</html>
+
