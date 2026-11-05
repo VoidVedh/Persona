@@ -22,6 +22,11 @@ public final class BorderController {
     public private(set) var currentBorderFrameAppKit: CGRect?
     public private(set) var isBorderVisible: Bool = false
 
+    public var isEnabled: Bool {
+        get { config.border.enabled }
+        set { config.border.enabled = newValue }
+    }
+
     public init(
         provider: AXWindowProvider = SystemAXWindowProvider(),
         config: AppConfig = AppConfig(),

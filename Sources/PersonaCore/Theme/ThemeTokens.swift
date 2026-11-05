@@ -77,6 +77,19 @@ public enum ThemeTokens {
         "cyan": cyan, "royalBlue": royalBlue, "midnight": midnight, "abyss": abyss, "white": white,
         "ice": ice, "azure": azure, "steel": steel, "warn": warn, "alert": alert, "darkHour": darkHour,
     ]
+
+    /// Extended terminal ANSI + Bright ANSI palette allowed in terminal profile configs.
+    public static let terminalAllowedHexSet: Set<String> = Set(
+        palette.values.map { $0.lowercased() } + [
+            "#b48cff", // ANSI 5 magenta
+            "#ff6b85", // Bright 1 red
+            "#8cffdf", // Bright 2 green
+            "#ffe07d", // Bright 3 yellow
+            "#4d8bff", // Bright 4 blue
+            "#ccaeff", // Bright 5 magenta
+            "#5ce5ff", // Bright 6 cyan
+        ]
+    )
 }
 
 /// Severity colouring for telemetry pills (§8.1 thresholds).

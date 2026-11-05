@@ -13,6 +13,7 @@ public final class LifecycleController {
     /// performed for real, even when the session itself runs in dry-run mode (I2).
     private let recoveryAdapter: SystemAdapter
     public private(set) var restoreService: RestoreService?
+    public private(set) var mutator: SystemMutator?
     public private(set) var heartbeatPump: HeartbeatPump?
     public private(set) var sessionLock: SessionLock?
     public private(set) var windowHost: WindowHostManager?
@@ -60,11 +61,13 @@ public final class LifecycleController {
 
             GuardianLauncher.spawn(supportDir: store.supportDir)
 
+            let mut = SystemMutator(store: store, adapter: adapter, state: state)
+            self.mutator = mut
+
             // If PERSONA_PHASE1_DEMO=1, apply dock & menuBar autohide mutations
             if ProcessInfo.processInfo.environment["PERSONA_PHASE1_DEMO"] == "1" {
-                let mutator = SystemMutator(store: store, adapter: adapter, state: state)
-                try mutator.apply(.dockAutohide(true))
-                try mutator.apply(.menuBarAutohide(true))
+                try mut.apply(.dockAutohide(true))
+                try mut.apply(.menuBarAutohide(true))
             }
 
             startWindows(restore: restore)
@@ -82,11 +85,19 @@ public final class LifecycleController {
         let userConfig = store.supportDir.appendingPathComponent("config.json")
         let (loaded, warnings) = AppConfig.load(userFile: userConfig)
         config = loaded
+        AppState.shared.configWarnings = warnings
         for warning in warnings { fputs("config: \(warning)\n", stderr) }
 
         let trusted = AXPermission.shared.isTrusted
         AppState.shared.axTrusted = trusted
         AppState.shared.tilingEnabled = config.tiling.enabled
+
+        // Render isolated terminal/CLI profiles into $TMPDIR/PersonaMode/profiles (Phase 6)
+        _ = try? ProfileRenderer.shared.render(mutator: mutator)
+
+        // Start Menu Bar Status Item & Config Watcher (Phase 6)
+        StatusBarController.shared.start()
+        ConfigWatcher.shared.start(supportDir: store.supportDir)
 
         // Inject AX window title provider into FocusTracker
         FocusTracker.shared.titleProvider = AXFocusTitleProvider()
@@ -181,6 +192,10 @@ public final class LifecycleController {
         router.onToggleDarkHour = {
             AppState.shared.toggleDarkHour()
         }
+        router.onOpenTerminal = { [weak self] in
+            guard let self = self else { return }
+            _ = try? TerminalLauncher.shared.launch(config: self.config, mutator: self.mutator)
+        }
         router.onShowLauncher = {
             LauncherController.shared.show()
         }
@@ -206,8 +221,10 @@ public final class LifecycleController {
         let userConfig = store.supportDir.appendingPathComponent("config.json")
         let (loaded, warnings) = AppConfig.load(userFile: userConfig)
         config = loaded
+        AppState.shared.configWarnings = warnings
         for warning in warnings { fputs("config: \(warning)\n", stderr) }
 
+        _ = try? ProfileRenderer.shared.render(mutator: mutator)
         windowHost?.updateConfig(loaded)
         BorderController.shared.updateConfig(loaded)
         TilingController.shared.updateConfig(loaded)
@@ -223,6 +240,11 @@ public final class LifecycleController {
             DistributedNotificationCenter.default().removeObserver(ctl)
             ctlObserver = nil
         }
+
+        ConfigWatcher.shared.stop()
+        StatusBarController.shared.stop()
+        ProfileRenderer.shared.cleanup(supportDir: store.supportDir)
+        TerminalAppProfile.removeInstalledProfile()
 
         HotKeyCenter.shared.unregisterAll()
         LauncherController.shared.stop()

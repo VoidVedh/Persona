@@ -155,9 +155,18 @@ if [ "$STATE_VALID" -eq 1 ]; then
         fi
     fi
 
+    # --- Terminal profile cleanup from ledger ---
+    HAS_TERM_PROFILE=$(tr -d '\n' < "$STATE_FILE" 2>/dev/null | grep -c '"terminalProfile"' || true)
+    if [ "${HAS_TERM_PROFILE:-0}" -gt 0 ]; then
+        echo "[restore_macos] Cleaning ledgered Terminal.app profile: Persona 3 Reload"
+        if [ -f "$HOME/Library/Preferences/com.apple.Terminal.plist" ]; then
+            run /usr/libexec/PlistBuddy -c "Delete :'Window Settings':'Persona 3 Reload'" "$HOME/Library/Preferences/com.apple.Terminal.plist"
+        fi
+    fi
+
     # --- Temp dirs cleanup from ledger (with strict security prefix check) ---
     # Safe prefixes: /tmp/PersonaMode*, $TMPDIR/PersonaMode*, $SUPPORT_DIR/*
-    TEMP_DIR_CLEANUP=$(tr -d '\n' < "$STATE_FILE" 2>/dev/null | grep -oE '"tempDir"[^}]*"path" *: *"[^"]+"' | sed -E 's/.*"path" *: *"([^"]+)".*/\1/' || true)
+    TEMP_DIR_CLEANUP=$(tr -d '\n' < "$STATE_FILE" 2>/dev/null | grep -oE '"tempDir"[^}]*"path" *: *"[^"]+"' | sed -E 's/.*"path" *: *"([^"]+)".*/\1/' | sed 's/\\//\//g' || true)
     for tpath in $TEMP_DIR_CLEANUP; do
         if [ -n "$tpath" ]; then
             IS_SAFE=0
@@ -192,7 +201,13 @@ else
     run defaults delete NSGlobalDomain AppleMenuBarVisibleInFullscreen
 fi
 
-# 4. Remove session and state files (session.lock deleted last)
+# 4. Remove session, temp profiles, and state files (session.lock deleted last)
+if [ -n "${TMPDIR:-}" ] && [ -d "${TMPDIR%/}/PersonaMode" ]; then
+    run rm -rf "${TMPDIR%/}/PersonaMode"
+fi
+if [ -d "/tmp/PersonaMode" ]; then
+    run rm -rf "/tmp/PersonaMode"
+fi
 run rm -f "$SUPPORT_DIR/state.json"
 run rm -f "$SUPPORT_DIR/state.json.tmp"
 run rm -f "$SUPPORT_DIR/state.json.prev"

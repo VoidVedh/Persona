@@ -27,6 +27,12 @@
   - **Carbon Hotkey Center (`HotKeyCenter`):** System-wide shortcuts registered via Carbon `RegisterEventHotKey` and automatically unregistered on exit.
   - **Floating Launcher (`LauncherPanel` / `LauncherController`):** P3R-styled floating panel with subsequence `FuzzyMatcher` scoring across `/Applications` and `/System/Applications`, built-in quick commands (`Tile Windows`, `Retile`, `Toggle Float`, `Reload Theme`, `Toggle Dark Hour`, `Open Terminal (P3R)`, `Exit Persona Mode`), keyboard navigation (`↑`/`↓`, `⌃J`/`⌃K`, `⏎`, `⌘⏎`, `⌘1…9`, `Esc`), and automatic dismissal on focus loss.
 
+- **Isolated Terminal/CLI Rice, Menu-Bar Controller & App Packaging (Phase 6):**
+  - **Isolated Terminal & Fastfetch Rice (`ProfileRenderer` / `TerminalLauncher`):** Renders P3R themes for `fastfetch`, `Ghostty`, `kitty`, `WezTerm`, `Alacritty`, `cava`, and macOS `Terminal.app` strictly into `$TMPDIR/PersonaMode/profiles/` (mode `0700`, ledgered write-ahead, zero dotfile pollution in `~/.config` or `~/.zshrc`).
+  - **Menu-Bar Status Item (`StatusBarController`):** Native macOS `NSStatusItem` with crescent moon template icon, quick actions, live Accessibility/config status, and `Return to macOS (Quit)`.
+  - **Config Hot-Reload (`ConfigWatcher`):** Watches `~/Library/Application Support/PersonaMode/config.json` via `DispatchSourceFileSystemObject` and hot-reloads theme/layout settings without creating files.
+  - **Signed `.app` Packaging (`scripts/build_app.sh`):** Packages `build/Persona Mode.app` with bundled fonts, profiles, and recovery scripts.
+
 ---
 
 ## Default Hotkeys

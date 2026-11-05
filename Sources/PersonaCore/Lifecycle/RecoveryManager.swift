@@ -15,10 +15,10 @@ public final class RecoveryManager {
         }
 
         // Must be strictly inside personaTmp or supportDir
-        if stdPath.hasPrefix(personaTmp) && stdPath != personaTmp {
+        if stdPath == personaTmp || stdPath.hasPrefix(personaTmp + "/") {
             return true
         }
-        if stdPath.hasPrefix(stdSupport) && stdPath != stdSupport {
+        if stdPath.hasPrefix(stdSupport + "/") {
             return true
         }
         return false

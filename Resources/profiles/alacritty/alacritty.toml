@@ -1,0 +1,48 @@
+# Persona 3 Reload — Isolated Alacritty Profile
+[window]
+title = "PERSONA // DARK HOUR"
+opacity = 0.92
+blur = true
+
+[window.padding]
+x = 14
+y = 14
+
+[font]
+size = 13.0
+
+[font.normal]
+family = "Menlo"
+
+[colors.primary]
+background = "#0a192f"
+foreground = "#e8f6ff"
+
+[colors.cursor]
+text = "#0a192f"
+cursor = "#00d8ff"
+
+[colors.selection]
+text = "#e8f6ff"
+background = "#1f6bff"
+
+[colors.normal]
+black = "#0a192f"
+red = "#ff3b5c"
+green = "#5dffcf"
+yellow = "#ffd24a"
+blue = "#1f6bff"
+magenta = "#b48cff"
+cyan = "#00d8ff"
+white = "#e8f6ff"
+
+[colors.bright]
+black = "#3a5a7a"
+red = "#ff6b85"
+green = "#8cffdf"
+yellow = "#ffe07d"
+blue = "#4d8bff"
+magenta = "#ccaeff"
+cyan = "#5ce5ff"
+white = "#ffffff"
+

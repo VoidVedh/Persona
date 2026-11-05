@@ -96,3 +96,18 @@ Evaluate relative window ordering (`order(.above, relativeTo:)`) vs `.floating` 
 - `BorderOverlayWindow` configured with `level = .floating`, `ignoresMouseEvents = true` (hard-locked), `isOpaque = false`, `backgroundColor = .clear`, and `hasShadow = false` renders cleanly above the active application window while remaining below the Persona Top Bar (`.statusBar` = 25) and the Floating Launcher (`popUpMenu - 1` = 100).
 - Setting `shapeLayer.shadowPath = newPath` alongside `shapeLayer.path = newPath` allows the WindowServer (`CARenderServer`) to composite the cyan outer glow in hardware with zero offscreen CPU rasterization overhead.
 - When `AXIsProcessTrusted()` is `false`, `SystemAXWindowProvider` gracefully falls back to `CGWindowListCopyWindowInfo` (normal layer `kCGWindowLayer == 0`) so the border tracker still follows the frontmost window without crashing or prompting.
+
+---
+
+## S-6 — Terminal.app Settings Set Removal & Zero-Dotfile Rice Isolation
+
+### Objective
+Determine the most reliable method to clean up the temporary `"Persona 3 Reload"` profile imported into macOS `Terminal.app` when used as the fallback terminal, without popping up `Terminal.app` if it is already closed.
+
+### Observations & Decisions
+1. **Isolated Configs (`$TMPDIR/PersonaMode/profiles/`):**
+   - `ProfileRenderer` copies `Resources/profiles/**` into `$TMPDIR/PersonaMode/profiles/` (mode `0700`) and substitutes `{{PROFILE_DIR}}` with the temporary directory's absolute path.
+   - `Ghostty`, `kitty`, `WezTerm`, and `Alacritty` accept explicit `--config-file` / `--config` CLI arguments pointing into `$TMPDIR/PersonaMode/profiles`, leaving zero residue in `~/.config` or `~/.zshrc`.
+2. **Terminal.app Fallback Cleanup:**
+   - Calling AppleScript `tell application "Terminal" ...` when `Terminal.app` is not running causes macOS to launch `Terminal.app`.
+   - **Decision:** Check `NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.Terminal")`. Only run `delete (every settings set whose name is "Persona 3 Reload")` via AppleScript when `Terminal.app` is already running; in all cases, delete `:'Window Settings':'Persona 3 Reload'` from `~/Library/Preferences/com.apple.Terminal.plist` via `/usr/libexec/PlistBuddy` followed by `CFPreferencesAppSynchronize("com.apple.Terminal")`. Mirror the `PlistBuddy` cleanup in `scripts/restore_macos.sh`.

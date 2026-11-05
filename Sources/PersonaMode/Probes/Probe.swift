@@ -28,6 +28,28 @@ public enum ProbeIO {
         return value
     }
 
+    /// Serialises `Encodable` value (sorted keys, pretty) to stdout and optionally `--out`.
+    @discardableResult
+    public static func emit<T: Encodable>(_ value: T, args: [String]) -> Int32 {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        guard let data = try? encoder.encode(value),
+              let text = String(data: data, encoding: .utf8) else {
+            fputs("Error: probe result is not valid JSON\n", stderr)
+            return 1
+        }
+        print(text)
+        if let path = Self.value(of: "--out", in: args) {
+            do {
+                try data.write(to: URL(fileURLWithPath: path), options: .atomic)
+            } catch {
+                fputs("Error writing to \(path): \(error.localizedDescription)\n", stderr)
+                return 1
+            }
+        }
+        return 0
+    }
+
     /// Serialises `object` (sorted keys, pretty) to stdout and optionally `--out`.
     @discardableResult
     public static func emit(_ object: Any, args: [String]) -> Int32 {

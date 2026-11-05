@@ -7,7 +7,8 @@ public enum ProbeRegistry {
         "snapshot", "windows", "windows-of", "fonts", "render",
         "telemetry", "focus", "spaces", "nowplaying", "nowplaying-inject",
         "ax", "windows-ax", "ax-events", "border-state",
-        "apps", "hotkeys", "launcher-open", "launcher-run"
+        "apps", "hotkeys", "launcher-open", "launcher-run",
+        "gen-terminal-profile", "profiles", "rice", "terminal-detect", "statusbar", "ctl"
     ]
 
     /// Runs the named probe; returns `nil` if the name is unknown.
@@ -31,6 +32,11 @@ public enum ProbeRegistry {
         case "hotkeys": return ProbeHotkeys.run(args: args)
         case "launcher-open": return ProbeLauncherOpen.run(args: args)
         case "launcher-run": return ProbeLauncherRun.run(args: args)
+        case "gen-terminal-profile": return ProbeGenTerminalProfile.run(args: args)
+        case "profiles", "rice": return ProbeProfiles.run(args: args)
+        case "terminal-detect": return ProbeTerminalDetect.run(args: args)
+        case "statusbar": return ProbeStatusBar.run(args: args)
+        case "ctl": return ProbeCtl.run(args: args)
         default: return nil
         }
     }

@@ -41,6 +41,7 @@ public final class AppState: ObservableObject {
     @Published public var axTrusted: Bool = false
     @Published public var tilingEnabled: Bool = true
     @Published public var hotkeyErrors: [String] = []
+    @Published public var configWarnings: [String] = []
 
     public init() {
         updateDarkHourPhase()

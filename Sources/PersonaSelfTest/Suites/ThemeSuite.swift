@@ -1,5 +1,7 @@
+import AppKit
 import Foundation
 import PersonaCore
+import PersonaKit
 
 public enum ThemeSuite {
     public static func run(_ t: Harness) {
@@ -77,6 +79,98 @@ public enum ThemeSuite {
             let seed = NowPlayingParser.parseSeed(source: "music", output: "Full Moon Full Life\tLotus Juice\tplaying\n")
             t.expectEqual(seed?.title, "Full Moon Full Life", "parsed seed title")
             t.expectEqual(seed?.state, .playing, "parsed seed state")
+
+            // Phase 6.1: Validate hex colors across all static terminal & CLI profiles against ThemeTokens
+            if let profilesDir = ProfileRenderer.resolveSourceProfilesDir() {
+                let textProfileFiles = [
+                    "fastfetch/config.jsonc",
+                    "ghostty/config",
+                    "kitty/kitty.conf",
+                    "wezterm/wezterm.lua",
+                    "alacritty/alacritty.toml",
+                    "cava/config"
+                ]
+                let regex = try? NSRegularExpression(pattern: "#[0-9a-fA-F]{6}", options: [])
+                for rel in textProfileFiles {
+                    let fileURL = profilesDir.appendingPathComponent(rel)
+                    let exists = FileManager.default.fileExists(atPath: fileURL.path)
+                    t.expect(exists, "profile exists: \(rel)")
+                    if let content = try? String(contentsOf: fileURL, encoding: .utf8),
+                       let regex = regex {
+                        let nsRange = NSRange(content.startIndex..<content.endIndex, in: content)
+                        let matches = regex.matches(in: content, options: [], range: nsRange)
+                        t.expect(!matches.isEmpty, "profile \(rel) contains hex colors")
+                        for m in matches {
+                            if let r = Range(m.range, in: content) {
+                                let hex = String(content[r]).lowercased()
+                                t.expect(
+                                    ThemeTokens.terminalAllowedHexSet.contains(hex),
+                                    "color \(hex) in \(rel) is in ThemeTokens.terminalAllowedHexSet"
+                                )
+                            }
+                        }
+                    }
+                }
+            } else {
+                t.fail("Could not locate Resources/profiles directory")
+            }
+
+            // Phase 6.1: TerminalAppProfile plist generation
+            if let plistData = try? TerminalAppProfile.generatePlistData(),
+               let plist = try? PropertyListSerialization.propertyList(from: plistData, options: [], format: nil) as? [String: Any] {
+                t.expectEqual(plist["name"] as? String, "Persona 3 Reload", "Terminal.app profile name")
+                t.expectEqual(plist["type"] as? String, "Window Settings", "Terminal.app profile type")
+                t.expect(plist["BackgroundColor"] is Data, "Terminal.app BackgroundColor encoded as Data")
+                t.expect(plist["CursorColor"] is Data, "Terminal.app CursorColor encoded as Data")
+            } else {
+                t.fail("TerminalAppProfile.generatePlistData() failed")
+            }
+
+            // Phase 6.2: ProfileRenderer renders into isolated $TMPDIR/PersonaMode/profiles and cleans up
+            if let renderedDir = try? ProfileRenderer.shared.render(mutator: nil) {
+                let ffConfig = renderedDir.appendingPathComponent("fastfetch/config.jsonc")
+                let runCmd = renderedDir.appendingPathComponent("run.command")
+                let termFile = renderedDir.appendingPathComponent("terminal-app/Persona3Reload.terminal")
+                t.expect(FileManager.default.fileExists(atPath: ffConfig.path), "rendered fastfetch/config.jsonc exists")
+                t.expect(FileManager.default.fileExists(atPath: runCmd.path), "rendered run.command exists")
+                t.expect(FileManager.default.fileExists(atPath: termFile.path), "rendered Persona3Reload.terminal exists")
+
+                if let text = try? String(contentsOf: ffConfig, encoding: .utf8) {
+                    t.expect(!text.contains("{{PROFILE_DIR}}"), "{{PROFILE_DIR}} placeholder substituted in fastfetch/config.jsonc")
+                    t.expect(text.contains(renderedDir.path), "fastfetch/config.jsonc contains rendered absolute path")
+                }
+
+                ProfileRenderer.shared.cleanup()
+                t.expect(!FileManager.default.fileExists(atPath: renderedDir.path), "ProfileRenderer.cleanup() removes rendered directory")
+            } else {
+                t.fail("ProfileRenderer.render() failed")
+            }
+
+            // Phase 6.3: TerminalLauncher detection & isolated command generation
+            let detected = TerminalLauncher.shared.detect()
+            t.expect(!detected.chosen.isEmpty, "TerminalLauncher detects a terminal (\(detected.chosen))")
+            t.expect(detected.available.contains("terminal"), "Terminal.app is always available as fallback")
+
+            let dummyProfileDir = URL(fileURLWithPath: "/tmp/PersonaMode/profiles")
+            let ghosttyCmd = TerminalLauncher.shared.buildCommand(chosen: "ghostty", profileDir: dummyProfileDir)
+            t.expect(ghosttyCmd.contains("--config-default-files=false"), "ghostty uses --config-default-files=false")
+            let kittyCmd = TerminalLauncher.shared.buildCommand(chosen: "kitty", profileDir: dummyProfileDir)
+            t.expect(kittyCmd.contains("--config"), "kitty uses isolated --config")
+
+            // Phase 6.4: StatusBarController menu items & lifecycle
+            MainActor.assumeIsolated {
+                _ = NSApplication.shared
+                StatusBarController.shared.start()
+                t.expect(StatusBarController.shared.isInstalled, "StatusBarController installed after start()")
+                let titles = (StatusBarController.shared.menu?.items ?? []).map { $0.title }
+                t.expect(titles.contains("Open P3R Launcher"), "Status menu has 'Open P3R Launcher'")
+                t.expect(titles.contains("Retile Windows Now"), "Status menu has 'Retile Windows Now'")
+                t.expect(titles.contains("Toggle Active Window Float"), "Status menu has 'Toggle Active Window Float'")
+                t.expect(titles.contains("Open Terminal (P3R)"), "Status menu has 'Open Terminal (P3R)'")
+                t.expect(titles.contains("Return to macOS (Quit)"), "Status menu has 'Return to macOS (Quit)'")
+                StatusBarController.shared.stop()
+                t.expect(!StatusBarController.shared.isInstalled, "StatusBarController removed after stop()")
+            }
         }
     }
 }

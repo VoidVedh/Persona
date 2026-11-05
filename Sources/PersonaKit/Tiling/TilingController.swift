@@ -18,7 +18,7 @@ public final class TilingController {
     public var isAXTrusted: () -> Bool
     public var screenProvider: @MainActor () -> [ScreenModel]
 
-    private var isEnabled: Bool = true
+    public private(set) var isEnabled: Bool = true
     private var eventSub: EventBus.SubscriptionToken?
     private var debounceTimer: DispatchSourceTimer?
     private var dragSettleTimer: DispatchSourceTimer?
