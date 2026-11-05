@@ -1,0 +1,61 @@
+{
+  "calm" : false,
+  "clockDay" : "THU 05",
+  "clockTime" : "16:42",
+  "focusedApp" : "TERMINAL",
+  "focusedTitle" : "zsh — persona --dry-run",
+  "nowPlaying" : {
+    "artist" : "ATLUS SOUND TEAM",
+    "source" : "Music",
+    "state" : "playing",
+    "title" : "COLOR YOUR NIGHT"
+  },
+  "phase" : "daytime",
+  "runMode" : "dryRun",
+  "screen" : {
+    "height" : 44,
+    "notch" : {
+      "w" : 0,
+      "x" : 0
+    },
+    "width" : 1512
+  },
+  "slot" : "AFTER SCHOOL",
+  "spaces" : [
+    {
+      "active" : true,
+      "index" : 1,
+      "occupied" : true
+    },
+    {
+      "active" : false,
+      "index" : 2,
+      "occupied" : true
+    },
+    {
+      "active" : false,
+      "index" : 3,
+      "occupied" : false
+    },
+    {
+      "active" : false,
+      "index" : 4,
+      "occupied" : false
+    },
+    {
+      "active" : false,
+      "index" : 5,
+      "occupied" : false
+    }
+  ],
+  "telemetry" : {
+    "battery" : 92,
+    "charging" : false,
+    "cpu" : 12,
+    "mem" : 44,
+    "muted" : false,
+    "volume" : 60,
+    "wifiBars" : 4
+  }
+}
+

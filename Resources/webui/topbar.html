@@ -6,11 +6,175 @@
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/shapes.css">
+  <link rel="stylesheet" href="css/topbar.css">
 </head>
 <body data-surface="topbar" data-fixture="bar.default" data-autoboot="1">
-  <div id="bar-root"></div>
+  <div id="bar-root">
+    <div id="topbar-shell" class="topbar-shell">
+      <!-- Non-notched full-width chamfered .s-bar backing -->
+      <div class="topbar-bg">
+        <div class="topbar-bg__cyan s-bar"></div>
+        <div class="topbar-bg__face s-bar"></div>
+      </div>
+
+      <div class="topbar-grid">
+        <!-- Left Cluster -->
+        <div class="topbar-cluster topbar-cluster--left">
+          <div class="topbar-wing-bg">
+            <div class="topbar-bg__cyan s-bar"></div>
+            <div class="topbar-bg__face s-bar"></div>
+          </div>
+          <div class="topbar-cluster__content">
+            <!-- 1. S.E.E.S. Original Emblem Badge -->
+            <div class="plate emblem-badge">
+              <i class="plate__back s-chamfer" style="--c:8px"></i>
+              <i class="plate__mid s-chamfer" style="--c:8px"></i>
+              <span class="plate__face s-chamfer" style="--c:8px">
+                <svg class="emblem-badge__icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M15.5 2.2A9.8 9.8 0 1 0 21.8 16 8.2 8.2 0 1 1 15.5 2.2Z" fill="#050c1a"/>
+                </svg>
+                <span class="emblem-badge__label">S.E.E.S.</span>
+              </span>
+            </div>
+
+            <!-- 2. Workspace Pills 01-05 -->
+            <div id="ws-strip" class="ws-strip"></div>
+
+            <!-- 3. Focused App Pill -->
+            <div class="plate focus-pill">
+              <i class="plate__back s-para" style="--sk:9px"></i>
+              <i class="plate__mid s-para" style="--sk:9px"></i>
+              <span class="plate__face s-para" style="--sk:9px">
+                <span id="focus-app" class="focus-pill__app">TERMINAL</span>
+                <span class="focus-pill__sep">▸</span>
+                <span id="focus-title" class="focus-pill__title">zsh — fastfetch</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Center Cluster (Ticker or Notch Gap) -->
+        <div class="topbar-cluster topbar-cluster--center">
+          <div class="plate ticker-pill">
+            <i class="plate__back s-chamfer" style="--c:9px"></i>
+            <i class="plate__mid s-chamfer" style="--c:9px"></i>
+            <span class="plate__face s-chamfer" style="--c:9px">
+              <div class="ticker-track">
+                <span id="ticker-text-a" class="ticker-text">♪ COLOR YOUR NIGHT — ATLUS SOUND TEAM   ◈   AFTER SCHOOL   ◈   </span>
+                <span id="ticker-text-b" class="ticker-text">♪ COLOR YOUR NIGHT — ATLUS SOUND TEAM   ◈   AFTER SCHOOL   ◈   </span>
+              </div>
+            </span>
+          </div>
+        </div>
+
+        <!-- Right Cluster -->
+        <div class="topbar-cluster topbar-cluster--right">
+          <div class="topbar-wing-bg">
+            <div class="topbar-bg__cyan s-bar"></div>
+            <div class="topbar-bg__face s-bar"></div>
+          </div>
+          <div class="topbar-cluster__content">
+            <!-- 5 Hardware Pills -->
+            <div class="hw-strip">
+              <div id="hw-cpu" class="plate hw-pill">
+                <i class="plate__back s-para" style="--sk:7px"></i>
+                <i class="plate__mid s-para" style="--sk:7px"></i>
+                <span class="plate__face s-para" style="--sk:7px">
+                  <span class="hw-pill__top">
+                    <span class="hw-pill__label">CPU</span>
+                    <span id="val-cpu" class="hw-pill__val">14%</span>
+                  </span>
+                  <span class="hw-pill__bar s-para" style="--sk:3px">
+                    <span id="fill-cpu" class="hw-pill__fill" style="--v:0.14"></span>
+                  </span>
+                </span>
+              </div>
+
+              <div id="hw-mem" class="plate hw-pill">
+                <i class="plate__back s-para" style="--sk:7px"></i>
+                <i class="plate__mid s-para" style="--sk:7px"></i>
+                <span class="plate__face s-para" style="--sk:7px">
+                  <span class="hw-pill__top">
+                    <span class="hw-pill__label">MEM</span>
+                    <span id="val-mem" class="hw-pill__val">48%</span>
+                  </span>
+                  <span class="hw-pill__bar s-para" style="--sk:3px">
+                    <span id="fill-mem" class="hw-pill__fill" style="--v:0.48"></span>
+                  </span>
+                </span>
+              </div>
+
+              <div id="hw-bat" class="plate hw-pill">
+                <i class="plate__back s-para" style="--sk:7px"></i>
+                <i class="plate__mid s-para" style="--sk:7px"></i>
+                <span class="plate__face s-para" style="--sk:7px">
+                  <span class="hw-pill__top">
+                    <span class="hw-pill__label">BAT</span>
+                    <span id="val-bat" class="hw-pill__val">88%</span>
+                  </span>
+                  <span class="hw-pill__bar s-para" style="--sk:3px">
+                    <span id="fill-bat" class="hw-pill__fill" style="--v:0.88"></span>
+                  </span>
+                </span>
+              </div>
+
+              <div id="hw-wifi" class="plate hw-pill">
+                <i class="plate__back s-para" style="--sk:7px"></i>
+                <i class="plate__mid s-para" style="--sk:7px"></i>
+                <span class="plate__face s-para" style="--sk:7px">
+                  <span class="hw-pill__top">
+                    <span class="hw-pill__label">WIFI</span>
+                    <span id="val-wifi" class="hw-pill__val">4/4</span>
+                  </span>
+                  <span class="hw-pill__bar s-para" style="--sk:3px">
+                    <span id="fill-wifi" class="hw-pill__fill" style="--v:1.0"></span>
+                  </span>
+                </span>
+              </div>
+
+              <div id="hw-vol" class="plate hw-pill">
+                <i class="plate__back s-para" style="--sk:7px"></i>
+                <i class="plate__mid s-para" style="--sk:7px"></i>
+                <span class="plate__face s-para" style="--sk:7px">
+                  <span class="hw-pill__top">
+                    <span class="hw-pill__label">VOL</span>
+                    <span id="val-vol" class="hw-pill__val">65%</span>
+                  </span>
+                  <span class="hw-pill__bar s-para" style="--sk:3px">
+                    <span id="fill-vol" class="hw-pill__fill" style="--v:0.65"></span>
+                  </span>
+                </span>
+              </div>
+            </div>
+
+            <!-- DRY RUN chip (hidden in live mode) -->
+            <div id="dryrun-chip" class="plate dryrun-chip" hidden>
+              <i class="plate__back s-para" style="--sk:6px"></i>
+              <span class="plate__face s-para" style="--sk:6px">DRY RUN</span>
+            </div>
+
+            <!-- Clock -->
+            <div class="clock-block">
+              <span id="clock-time" class="p3-outline--sm clock-time" data-text="16:42">16:42</span>
+              <span class="clock-day">
+                <span id="clock-dow">THU</span>
+                <span id="clock-dom">05</span>
+              </span>
+            </div>
+
+            <!-- EXIT P3R button -->
+            <button id="exit-btn" type="button" class="plate exit-btn" title="Return to macOS">
+              <i class="plate__back s-chamfer" style="--c:7px"></i>
+              <i class="plate__mid s-chamfer" style="--c:7px"></i>
+              <span class="plate__face s-chamfer" style="--c:7px">EXIT P3R</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <script src="js/fixtures.js"></script>
   <script src="js/bridge.js"></script>
+  <script src="js/topbar.js"></script>
 </body>
 </html>
-

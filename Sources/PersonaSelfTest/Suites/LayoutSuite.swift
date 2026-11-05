@@ -159,7 +159,7 @@ public enum LayoutSuite {
             isPrimary: true
         )
 
-        // BorderOverlayWindow safety invariants (Guardrail 4)
+        // BorderOverlayWindow safety invariants (Guardrail 4 + V2 §6.8 5-layer P3R frame)
         let borderWin = BorderOverlayWindow(screen: screenModel)
         t.expect(borderWin.ignoresMouseEvents, "borderWin: ignoresMouseEvents == true")
         borderWin.ignoresMouseEvents = false
@@ -169,6 +169,15 @@ public enum LayoutSuite {
         t.expect(!borderWin.hasShadow, "borderWin: hasShadow == false")
         t.expect(!borderWin.canBecomeKey, "borderWin: canBecomeKey == false")
         t.expect(!borderWin.canBecomeMain, "borderWin: canBecomeMain == false")
+        t.expectEqual(borderWin.borderSublayers.count, 5, "borderWin has 5 P3R CAShapeLayer sublayers (glowOuter, glowInner, frame, brackets, ticks)")
+        let testRing = CGRect(x: 100, y: 100, width: 600, height: 400)
+        borderWin.updateRing(rectAppKit: testRing, cornerRadius: 16, borderWidth: 3, style: .p3r, bracketLength: 28, pulse: false, animated: false)
+        t.expectEqual(borderWin.updateCount, 1, "first updateRing increments updateCount to 1")
+        t.expect(borderWin.bracketsLayer.path != nil, "p3r style populates bracketsLayer.path")
+        t.expect(borderWin.ticksLayer.path != nil, "p3r style populates ticksLayer.path")
+        // Equal rect + style + bracketLength early-out (no layer churn)
+        borderWin.updateRing(rectAppKit: testRing, cornerRadius: 16, borderWidth: 3, style: .p3r, bracketLength: 28, pulse: false, animated: false)
+        t.expectEqual(borderWin.updateCount, 1, "equal rect/style/bracketLength early-outs without layer churn")
         borderWin.close()
 
         // Synthetic window set testing self-exclusion, layer!=0, minimized, hidden, and tiny popups
@@ -271,6 +280,26 @@ public enum LayoutSuite {
         let expectedMinTop = cfg.topBar.marginTop + max(38, cfg.topBar.height) + cfg.tiling.gaps.outer
         for call in mockProvider.setFrameCalls {
             t.expect(call.frame.minY >= expectedMinTop, "tiled window \(call.id) reserves top bar + outer gap (minY=\(call.frame.minY) >= \(expectedMinTop))")
+        }
+
+        // Secondary 2560x1440 display with non-zero origin: tiled windows never overlap the 44pt bar
+        let secScreen = ScreenModel(
+            id: 9502,
+            uuid: "test-layout-secondary-2560",
+            frame: CGRect(x: 1512, y: -200, width: 2560, height: 1440),
+            safeTop: 0,
+            isPrimary: false
+        )
+        let secScreenAX = CoordinateSpace.toAX(secScreen.frame, primaryHeight: 982)
+        let secInset = BarInset(marginTop: cfg.topBar.marginTop, height: cfg.topBar.height)
+        let secRects = LayoutEngine.layout(
+            ids: [601, 602],
+            screen: secScreenAX,
+            bar: secInset,
+            gaps: Gaps(outer: cfg.tiling.gaps.outer, inner: cfg.tiling.gaps.inner)
+        )
+        for (_, r) in secRects {
+            t.expect(r.minY >= secScreenAX.minY + cfg.topBar.marginTop + 44 + cfg.tiling.gaps.outer, "2560x1440 secondary display window never overlaps 44pt bar")
         }
 
         // Test 3: FrameJournal recorded pre-tile frames and restores them cleanly

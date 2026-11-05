@@ -158,6 +158,8 @@ public final class BorderController {
                     rectAppKit: ringAppKit,
                     cornerRadius: config.border.cornerRadius,
                     borderWidth: borderWidth,
+                    style: config.border.style,
+                    bracketLength: config.border.bracketLength,
                     pulse: config.border.pulse,
                     animated: animated
                 )

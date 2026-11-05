@@ -1,0 +1,61 @@
+{
+  "calm" : false,
+  "clockDay" : "THU 05",
+  "clockTime" : "00:14",
+  "focusedApp" : "TERMINAL",
+  "focusedTitle" : "tartarus — floor 254",
+  "nowPlaying" : {
+    "artist" : "ATLUS SOUND TEAM",
+    "source" : "Music",
+    "state" : "playing",
+    "title" : "TARTARUS — BLOCK 6"
+  },
+  "phase" : "darkHour",
+  "runMode" : "live",
+  "screen" : {
+    "height" : 44,
+    "notch" : {
+      "w" : 0,
+      "x" : 0
+    },
+    "width" : 1512
+  },
+  "slot" : "DARK HOUR",
+  "spaces" : [
+    {
+      "active" : false,
+      "index" : 1,
+      "occupied" : true
+    },
+    {
+      "active" : true,
+      "index" : 2,
+      "occupied" : true
+    },
+    {
+      "active" : false,
+      "index" : 3,
+      "occupied" : true
+    },
+    {
+      "active" : false,
+      "index" : 4,
+      "occupied" : false
+    },
+    {
+      "active" : false,
+      "index" : 5,
+      "occupied" : false
+    }
+  ],
+  "telemetry" : {
+    "battery" : 84,
+    "charging" : true,
+    "cpu" : 18,
+    "mem" : 54,
+    "muted" : false,
+    "volume" : 68,
+    "wifiBars" : 4
+  }
+}
+

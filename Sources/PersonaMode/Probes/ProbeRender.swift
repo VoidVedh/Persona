@@ -53,7 +53,21 @@ public enum ProbeRender: Probe {
         case "wallpaper":
             viewToRender = AnyView(WallpaperView())
         case "border":
-            viewToRender = AnyView(BorderPreviewView(width: width, height: height))
+            let borderH = ProbeIO.double(of: "--h", in: args, default: 520)
+            guard let cgImage = BorderOverlayWindow.renderPreviewCGImage(
+                width: width,
+                height: CGFloat(borderH),
+                scale: scale
+            ) else {
+                fputs("Error: BorderOverlayWindow.renderPreviewCGImage failed\n", stderr)
+                return 1
+            }
+            guard ProbeRenderWebUI.writePNG(cgImage: cgImage, to: outPath) else {
+                fputs("Error: Failed to write border PNG to \(outPath)\n", stderr)
+                return 1
+            }
+            print("Rendered border to \(outPath) (\(cgImage.width)x\(cgImage.height) px)")
+            return 0
         case "launcher":
             let query = ProbeIO.string(of: "--query", in: args) ?? ""
             let vm = LauncherViewModel(initialQuery: query)

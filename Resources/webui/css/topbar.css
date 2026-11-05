@@ -1,0 +1,532 @@
+/* Persona Mode V2 — Waybar-Style P3R Top Bar (§6.3) */
+
+#bar-root {
+  position: relative;
+  width: 100vw;
+  height: 44px;
+  padding: 3px 16px 7px 16px;
+  contain: layout paint style;
+}
+
+.topbar-shell {
+  position: relative;
+  width: 100%;
+  height: 34px;
+  filter: drop-shadow(0 2px 0 var(--ink));
+}
+
+/* Split backing plates when NOT notched: single full-width .s-bar */
+.topbar-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.topbar-bg__cyan {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--cyan) 0%, var(--azure) 50%, var(--cyan) 100%);
+  transform: translate(0, 2px);
+}
+
+.topbar-bg__face {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(12 30 58 / 0.96) 0%, rgb(7 18 36 / 0.97) 100%);
+  border-top: 1px solid rgb(255 255 255 / 0.38);
+}
+
+/* When notched (--notch-w > 0), hide the center of the background strip so the notch gap is 100% clear */
+.topbar-shell[data-notched="1"] > .topbar-bg {
+  display: none;
+}
+
+.topbar-wing-bg {
+  display: none;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.topbar-shell[data-notched="1"] .topbar-wing-bg {
+  display: block;
+}
+
+/* 3-column grid: left cluster | center ticker or notch gap | right cluster */
+.topbar-grid {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 34px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--center-col, auto) minmax(0, 1fr);
+  align-items: center;
+  padding: 0 14px;
+  gap: 10px;
+}
+
+.topbar-shell[data-notched="1"] .topbar-grid {
+  padding: 0;
+  gap: 0;
+}
+
+.topbar-cluster {
+  position: relative;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.topbar-cluster--left {
+  gap: 9px;
+  justify-content: flex-start;
+}
+
+.topbar-cluster--center {
+  justify-content: center;
+}
+
+.topbar-cluster--right {
+  gap: 7px;
+  justify-content: flex-end;
+}
+
+.topbar-shell[data-notched="1"] .topbar-cluster--left {
+  padding: 0 14px;
+}
+
+.topbar-shell[data-notched="1"] .topbar-cluster--right {
+  padding: 0 14px;
+}
+
+.topbar-cluster__content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: inherit;
+  width: 100%;
+  min-width: 0;
+}
+
+.topbar-cluster--right .topbar-cluster__content {
+  justify-content: flex-end;
+}
+
+/* 1. Emblem badge: 78x28 .s-chamfer --c:8px, white face, navy text, cyan plate (3,3) */
+.emblem-badge {
+  width: 82px;
+  height: 26px;
+  flex-shrink: 0;
+  cursor: default;
+}
+
+.emblem-badge .plate__back {
+  background: var(--cyan);
+  transform: translate(3px, 3px);
+}
+
+.emblem-badge .plate__mid {
+  background: var(--ink);
+  transform: translate(1.5px, 1.5px);
+}
+
+.emblem-badge .plate__face {
+  background: var(--white);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 7px;
+}
+
+.emblem-badge__icon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.emblem-badge__label {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.18em;
+  line-height: 1;
+  color: var(--ink);
+  transform: skewX(-8deg);
+}
+
+/* 2. Workspace pills 01-05 */
+.ws-strip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.ws-pill {
+  position: relative;
+  width: 32px;
+  height: 25px;
+  cursor: pointer;
+  transition: width 220ms var(--ease-snap), transform 140ms var(--ease-snap), opacity 160ms var(--ease-out);
+}
+
+.ws-pill[data-empty="1"] {
+  opacity: 0.52;
+}
+
+.ws-pill:hover {
+  transform: translate(-1px, -1px);
+  opacity: 1;
+}
+
+.ws-pill .plate__back {
+  background: var(--steel);
+  transform: translate(2px, 2px);
+}
+
+.ws-pill .plate__mid {
+  background: var(--ink);
+  transform: translate(1px, 1px);
+}
+
+.ws-pill .plate__face {
+  background: var(--midnight);
+  color: var(--ice);
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Occupied 4px cyan dot top-right */
+.ws-pill__dot {
+  position: absolute;
+  top: 3px;
+  right: 6px;
+  width: 4px;
+  height: 4px;
+  background: var(--cyan);
+  border-radius: 50%;
+}
+
+/* Active workspace pill: 66x25, white face, navy text, cyan plate (3,3), slash highlight */
+.ws-pill[data-active="1"] {
+  width: 66px;
+  opacity: 1;
+}
+
+.ws-pill[data-active="1"] .plate__back {
+  background: var(--cyan);
+  transform: translate(3px, 3px);
+}
+
+.ws-pill[data-active="1"] .plate__mid {
+  background: var(--ink);
+  transform: translate(1.5px, 1.5px);
+}
+
+.ws-pill[data-active="1"] .plate__face {
+  background: var(--white);
+  color: var(--ink);
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.1em;
+}
+
+.ws-pill[data-active="1"] .ws-pill__dot {
+  background: var(--royal);
+}
+
+.ws-pill__slash {
+  display: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 6px;
+  width: 8px;
+  background: var(--cyan);
+  transform: skewX(-20deg);
+  opacity: 0.85;
+}
+
+.ws-pill[data-active="1"] .ws-pill__slash {
+  display: block;
+}
+
+/* 3. Focused-app pill */
+.focus-pill {
+  height: 25px;
+  min-width: 120px;
+  max-width: 250px;
+  flex-shrink: 1;
+}
+
+.focus-pill .plate__back {
+  background: var(--cyan);
+  transform: translate(2.5px, 2.5px);
+}
+
+.focus-pill .plate__mid {
+  background: var(--ink);
+  transform: translate(1px, 1px);
+}
+
+.focus-pill .plate__face {
+  background: rgb(6 26 69 / 0.92);
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-start;
+}
+
+.focus-pill__app {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  color: var(--white);
+  flex-shrink: 0;
+  transform: skewX(-8deg);
+}
+
+.focus-pill__sep {
+  color: var(--cyan);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.focus-pill__title {
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  color: rgb(232 246 255 / 0.82);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Center ticker */
+.ticker-pill {
+  width: clamp(210px, 24vw, 340px);
+  height: 25px;
+}
+
+.topbar-shell[data-notched="1"] .ticker-pill {
+  display: none;
+}
+
+.ticker-pill .plate__back {
+  background: var(--cyan);
+  transform: translate(2.5px, 2.5px);
+}
+
+.ticker-pill .plate__mid {
+  background: var(--ink);
+  transform: translate(1px, 1px);
+}
+
+.ticker-pill .plate__face {
+  background: var(--abyss);
+  padding: 0 12px;
+  overflow: hidden;
+  justify-content: flex-start;
+}
+
+.ticker-track {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  gap: 24px;
+  will-change: transform;
+  animation: ticker-scroll 14s linear infinite;
+}
+
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.ticker-text {
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--cyan-hi);
+}
+
+/* Right cluster: Hardware telemetry pills (CPU, MEM, BAT, WIFI, VOL) */
+.hw-strip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.hw-pill {
+  width: 72px;
+  height: 25px;
+  flex-shrink: 0;
+}
+
+.hw-pill .plate__back {
+  background: var(--cyan);
+  transform: translate(2px, 2px);
+}
+
+.hw-pill .plate__mid {
+  background: var(--ink);
+  transform: translate(1px, 1px);
+}
+
+.hw-pill .plate__face {
+  background: var(--midnight);
+  padding: 2px 11px 3px 9px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+}
+
+.hw-pill__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  line-height: 1;
+}
+
+.hw-pill__label {
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 700;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--cyan);
+}
+
+.hw-pill__val {
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--white);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Mini progress slash at bottom of each hw-pill */
+.hw-pill__bar {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  background: rgb(255 255 255 / 0.16);
+}
+
+.hw-pill__fill {
+  position: absolute;
+  inset: 0;
+  background: var(--cyan);
+  transform-origin: left center;
+  transform: scaleX(var(--v, 0.5));
+}
+
+.hw-pill[data-level="warn"] .hw-pill__fill,
+.hw-pill[data-level="warn"] .plate__back {
+  background: var(--warn);
+}
+
+.hw-pill[data-level="alert"] .hw-pill__fill,
+.hw-pill[data-level="alert"] .plate__back {
+  background: var(--alert);
+}
+
+/* DRY RUN amber chip */
+.dryrun-chip {
+  height: 24px;
+  width: 68px;
+  flex-shrink: 0;
+}
+
+.dryrun-chip[ hidden ] {
+  display: none !important;
+}
+
+.dryrun-chip .plate__back {
+  background: var(--ink);
+  transform: translate(2px, 2px);
+}
+
+.dryrun-chip .plate__face {
+  background: var(--warn);
+  color: var(--ink);
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+}
+
+/* Clock block */
+.clock-block {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+
+.clock-time {
+  font-size: 25px;
+  letter-spacing: 0.04em;
+}
+
+.clock-day {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.02;
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--cyan);
+}
+
+/* EXIT P3R crimson button */
+.exit-btn {
+  width: 88px;
+  height: 26px;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 120ms var(--ease-snap);
+}
+
+.exit-btn .plate__back {
+  background: var(--cyan);
+  transform: translate(3px, 3px);
+}
+
+.exit-btn .plate__mid {
+  background: var(--ink);
+  transform: translate(1.5px, 1.5px);
+}
+
+.exit-btn .plate__face {
+  background: var(--alert);
+  color: var(--white);
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.12em;
+}
+
+.exit-btn:hover {
+  transform: translate(-1px, -1px);
+}
+
+.exit-btn:hover .plate__face {
+  background: var(--white);
+  color: var(--alert);
+}
+
+.exit-btn:active {
+  transform: translate(2px, 2px);
+}
+

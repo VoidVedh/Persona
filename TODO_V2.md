@@ -118,27 +118,27 @@
 # PHASE V2.3 — Waybar-style Top Bar + native Border overhaul
 **Goal:** the bar and the active-window frame read as authentic P3R at first glance.
 
-- [ ] **V2.3.1 Shape-kit contact sheet**
+- [x] **V2.3.1 Shape-kit contact sheet**
   **Files:** `Resources/webui/dev-shapes.html` (render target), `css/shapes.css`.
   **Details:** §6.2 — one page showing every class with the plate recipe and the 3-layer outline numerals (`11 / 05`) on `#0a192f`.
   **Verify:** `swift run PersonaMode --probe render webui shapes /tmp/v2_shapes.png --w 900 --h 520 --scale 2 --freeze 0` → open PNG; confirm: slanted parallelograms (not rectangles), chamfers, jagged frame, **drop-shadow not clipped** (the wrapper-filter pattern works), outline numerals show white/navy/cyan layers. Log in `docs/V2_VISUAL_LOG.md`.
 
-- [ ] **V2.3.2 `topbar.html` / `topbar.css` / `topbar.js`**
+- [x] **V2.3.2 `topbar.html` / `topbar.css` / `topbar.js`**
   **Files:** `Resources/webui/{topbar.html,css/topbar.css,js/topbar.js}`, `fixtures/bar.{default,notch,darkhour,dryrun}.json`.
   **Details:** §6.3 completely: `.s-bar` strip, emblem badge (original), workspace pills with the active slash-sweep (single allowed layout animation), focus pill with `textContent` + ellipsis, centre ticker (marquee, duplicated content, `data-calm` pause), five hardware pills with `scaleX(var(--v))` progress slashes and warn/alert colouring, clock (ticks in JS), `EXIT P3R`, `DRY RUN` chip, notch grid (`--notch-w`). Hover/active states per spec. Intents: `post("switchSpace",{n})`, `post("exit")`. JS never uses `innerHTML`.
   **Verify:** Safari `dev.html` renders all four fixtures; `V-TEST weblint` clean.
 
-- [ ] **V2.3.3 Swift wiring: bar content, publisher, geometry, tiler inset**
+- [x] **V2.3.3 Swift wiring: bar content, publisher, geometry, tiler inset**
   **Files:** `Sources/PersonaKit/Web/WebStatePublisher.swift`, `Sources/PersonaKit/Web/WebContentFactory.swift` (`makeBarContent`), `Sources/PersonaKit/Windows/TopBarPanel.swift`, `Sources/PersonaCore/Config/AppConfig.swift` + `config/default-config.json` (`topBar.height` 44), `Sources/PersonaCore/Layout/WindowGeometry.swift` (if constants), selftest goldens.
   **Details:** publisher subscribes to `AppState` (`focusedApp/Title`, `spaceSnapshot`, `telemetry`, `nowPlaying`, `darkHourPhase`, `axTrusted`, `tilingEnabled`, `runMode`, `soundMuted`) and publishes **diff patches**, telemetry ≤ 2 Hz, coalesced per run-loop turn. Bar window 44 pt tall; send `screen.notch` from `ScreenModel.auxLeft/auxRight`. Intents: `switchSpace` → `SpaceProvider.switchTo(spaceIndex:)`, `exit` → `CommandRouter.send(.exitPersona)`. Tiler reserves the new height automatically (`max(38, config.height, safeTop)`); update goldens that hard-code the old default **deliberately** and add an assertion that tiled windows never overlap the 44 pt bar on 1512×982 and 2560×1440 (non-zero origin).
   **Verify:** `V-ALL` green; `bash scripts/smoke_gui.sh` PASS (still 2 + border windows, correct layers `[-2147483604, 25]`); `PERSONA_DRY_RUN=1 swift run PersonaMode --probe windows --seconds 2` reports bar height `max(44, safeTop)` (record the real value and display type in the log); first-click works on the first press without activating the app (manual note in log).
 
-- [ ] **V2.3.4 `BorderOverlayWindow` P3R frame (native)**
+- [x] **V2.3.4 `BorderOverlayWindow` P3R frame (native)**
   **Files:** `Sources/PersonaKit/Windows/BorderOverlayWindow.swift`, `Sources/PersonaCore/Config/AppConfig.swift` (`border.style`, `border.bracketLength`), `Sources/PersonaKit/Border/BorderController.swift` (pass style), `ProbeRender` border target, `LayoutSuite`/new `BorderSuite`.
   **Details:** §6.8: five layers (`glowOuter`, `glowInner`, `frame`, `brackets`, `ticks`), chamfered bracket polygon `(0,0)→(L,0)→(L−4,T)→(T,T)→(T,L−4)→(0,L)` mirrored by affine transforms, group rasterisation re-done only on rect change, glow-opacity pulse 2.4 s, `plain` style = V1 look. Keep the Guardrail-4 locks verbatim. Replace the SwiftUI `BorderPreviewView` render path with a render of the **real window layers** over a synthetic dark window (layer `render(in:)`).
   **Verify:** `V-TEST layout` (all prior border assertions unchanged and green) + new assertions: 5 sublayers exist; `ignoresMouseEvents == true` after attempted set; `bracketLength` clamps 16…48; ring rect equality early-out (no layer churn). `swift run PersonaMode --probe render border /tmp/v2_border.png --w 800 --h 520 --scale 2`.
 
-- [ ] **V2.3.5 Visual gate — top bar + border**
+- [x] **V2.3.5 Visual gate — top bar + border**
   **Files:** `docs/V2_VISUAL_LOG.md`, `docs/screenshots/`.
   **Details:** follow the **Visual QA protocol** with the §12.4 **Top bar** and **Border** rubrics.
   **Verify:** all of:
@@ -151,7 +151,7 @@
   ```
   then **view each PNG** and tick the rubric lines in the log. Gate is the log, not the exit code.
 
-- [ ] **V2.3.6 Perf checkpoint**
+- [x] **V2.3.6 Perf checkpoint**
   **Verify:** `bash scripts/perf_check.sh 30` (dry-run) stays within the §11.2 numbers recorded in V2.2.9; record in the log.
 
 ### ✅ Phase V2.3 gate
