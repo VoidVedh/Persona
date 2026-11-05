@@ -42,5 +42,11 @@ Persona Mode uses the minimum macOS permissions required to provide window tilin
 - **Screen Recording:** Never required (window bounds/layers use `CGWindowListCopyWindowInfo` without window name capture; titles come from Accessibility).
 - **Input Monitoring:** Never required (global hotkeys use Carbon `RegisterEventHotKey`).
 - **Location Services:** Never required (Wi-Fi telemetry reads RSSI signal bars, never SSID).
-- **Full Disk Access:** Never required.
+## 4. Run Modes & Testing Without Moving Windows
+
+- **Live Mode (Default):** Launching `Persona Mode.app` or `PersonaMode` with no flags runs in **LIVE** mode (real Dock/Menu Bar mutations + live AX window tiling when trusted).
+- **Dry-Run (`--dry-run` or `PERSONA_DRY_RUN=1`):** Logs all system mutations via `DryRunAdapter` without modifying macOS settings or moving windows.
+- **Frozen Windows (`--no-window-moves` or `PERSONA_NO_WINDOW_MOVES=1`):** Performs real Dock/Menu Bar mutations while gating `SystemAXWindowProvider.setWindowFrame` so automated zero-trace tests (`make verify-clean`) never resize the user's open windows.
+- **Deprecated:** `PERSONA_PHASE1_DEMO` is deprecated and ignored with a stderr warning.
+
 

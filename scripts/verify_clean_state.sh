@@ -81,7 +81,7 @@ BASE_FP=$(fingerprint)
 # Scenario 1: SIGINT graceful termination
 # ---------------------------------------------------------
 echo "Running Scenario 1: SIGINT..."
-PERSONA_PHASE1_DEMO=1 "$BIN_PATH" >/dev/null 2>&1 &
+PERSONA_NO_WINDOW_MOVES=1 "$BIN_PATH" >/dev/null 2>&1 &
 APP_PID=$!
 
 if ! wait_for_hidden; then
@@ -107,7 +107,7 @@ fi
 # Scenario 2: SIGTERM graceful termination
 # ---------------------------------------------------------
 echo "Running Scenario 2: SIGTERM..."
-PERSONA_PHASE1_DEMO=1 "$BIN_PATH" >/dev/null 2>&1 &
+PERSONA_NO_WINDOW_MOVES=1 "$BIN_PATH" >/dev/null 2>&1 &
 APP_PID=$!
 
 if ! wait_for_hidden; then
@@ -133,7 +133,7 @@ fi
 # Scenario 3: kill -9 crash (Guardian watchdog restores)
 # ---------------------------------------------------------
 echo "Running Scenario 3: kill -9 (Guardian restoration)..."
-PERSONA_PHASE1_DEMO=1 "$BIN_PATH" >/dev/null 2>&1 &
+PERSONA_NO_WINDOW_MOVES=1 "$BIN_PATH" >/dev/null 2>&1 &
 APP_PID=$!
 
 if ! wait_for_hidden; then
@@ -162,7 +162,7 @@ fi
 # Scenario 4: kill -9 with PERSONA_NO_GUARDIAN=1 then run restore_macos.sh
 # ---------------------------------------------------------
 echo "Running Scenario 4: kill -9 with no guardian, manual restore..."
-PERSONA_NO_GUARDIAN=1 PERSONA_PHASE1_DEMO=1 "$BIN_PATH" >/dev/null 2>&1 &
+PERSONA_NO_GUARDIAN=1 PERSONA_NO_WINDOW_MOVES=1 "$BIN_PATH" >/dev/null 2>&1 &
 APP_PID=$!
 
 if ! wait_for_hidden; then
@@ -191,7 +191,7 @@ fi
 # Scenario 5: kill -STOP (hang) => Guardian restores within hangSeconds
 # ---------------------------------------------------------
 echo "Running Scenario 5: kill -STOP hang (Guardian restoration)..."
-PERSONA_HANG_SECONDS=3 PERSONA_PHASE1_DEMO=1 "$BIN_PATH" >/dev/null 2>&1 &
+PERSONA_HANG_SECONDS=3 PERSONA_NO_WINDOW_MOVES=1 "$BIN_PATH" >/dev/null 2>&1 &
 APP_PID=$!
 
 if ! wait_for_hidden; then
@@ -223,7 +223,7 @@ fi
 # Scenario 6: Stale state: kill -9 with no guardian, then launch app again
 # ---------------------------------------------------------
 echo "Running Scenario 6: Stale state recovery on next launch..."
-PERSONA_NO_GUARDIAN=1 PERSONA_PHASE1_DEMO=1 "$BIN_PATH" >/dev/null 2>&1 &
+PERSONA_NO_GUARDIAN=1 PERSONA_NO_WINDOW_MOVES=1 "$BIN_PATH" >/dev/null 2>&1 &
 APP_PID=$!
 
 if ! wait_for_hidden; then
@@ -235,8 +235,8 @@ fi
 kill -9 "$APP_PID" 2>/dev/null || true
 sleep 0.5
 
-# Launch app again without demo mutations; it must recover stale state first!
-PERSONA_NO_GUARDIAN=1 PERSONA_PHASE1_DEMO=0 "$BIN_PATH" >/dev/null 2>&1 &
+# Launch app again in dry-run; it must recover stale state for real first (I2)!
+PERSONA_NO_GUARDIAN=1 PERSONA_DRY_RUN=1 "$BIN_PATH" >/dev/null 2>&1 &
 SECOND_PID=$!
 sleep 2.0
 

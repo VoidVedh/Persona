@@ -1,6 +1,7 @@
 #!/bin/bash
 # scripts/e2e_tiling.sh — Automated E2E verification of window tiling and frame restoration.
-# Supports both headless/synthetic execution and live AX testing if permissions are available.
+# PersonaMode runs LIVE by default; this script exports PERSONA_DRY_RUN=1 so automated runs
+# never mutate Dock/Menu Bar or move user windows during headless/synthetic checks.
 set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"

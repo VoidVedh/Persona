@@ -22,6 +22,8 @@ public final class LifecycleController {
     private var exitObserver: NSObjectProtocol?
     private var ctlObserver: NSObjectProtocol?
 
+    private let hasCustomAdapter: Bool
+
     public init(
         store: StateStore = StateStore(),
         adapter: SystemAdapter? = nil
@@ -30,15 +32,17 @@ public final class LifecycleController {
         if let customAdapter = adapter {
             self.adapter = customAdapter
             self.recoveryAdapter = customAdapter
+            self.hasCustomAdapter = true
         } else {
-            let isDryRun = ProcessInfo.processInfo.environment["PERSONA_DRY_RUN"] == "1"
+            let options = LaunchOptions.parse()
             let real = RealSystemAdapter()
             self.recoveryAdapter = real
-            if isDryRun {
+            if options.runMode == .dryRun {
                 self.adapter = DryRunAdapter(underlying: real)
             } else {
                 self.adapter = real
             }
+            self.hasCustomAdapter = false
         }
     }
 
@@ -46,10 +50,23 @@ public final class LifecycleController {
         guard !isRunning else { return }
         isRunning = true
 
+        let options = LaunchOptions.parse()
+        AppState.shared.runMode = options.runMode
+        if !hasCustomAdapter {
+            let real = RealSystemAdapter()
+            self.adapter = options.runMode == .dryRun ? DryRunAdapter(underlying: real) : real
+        }
+
+        let userConfig = store.supportDir.appendingPathComponent("config.json")
+        let (loaded, warnings) = AppConfig.load(userFile: userConfig)
+        config = loaded
+        AppState.shared.configWarnings = warnings
+        for warning in warnings { fputs("config: \(warning)\n", stderr) }
+
         do {
             // I2: if a previous session died while mutating, restore it for real BEFORE snapshotting.
             _ = try RecoveryManager.recoverIfStale(store: store, adapter: recoveryAdapter)
-            let state = try SnapshotService.begin(store: store, lock: &sessionLock, adapter: adapter, mode: .overlay)
+            let state = try SnapshotService.begin(store: store, lock: &sessionLock, adapter: adapter, mode: config.wallpaper.mode)
             let restore = RestoreService(store: store, adapter: adapter)
             self.restoreService = restore
             RestoreService.shared = restore
@@ -78,12 +95,6 @@ public final class LifecycleController {
     }
 
     private func startWindows(restore: RestoreService) {
-        let userConfig = store.supportDir.appendingPathComponent("config.json")
-        let (loaded, warnings) = AppConfig.load(userFile: userConfig)
-        config = loaded
-        AppState.shared.configWarnings = warnings
-        for warning in warnings { fputs("config: \(warning)\n", stderr) }
-
         let trusted = AXPermission.shared.isTrusted
         AppState.shared.axTrusted = trusted
         AppState.shared.tilingEnabled = config.tiling.enabled

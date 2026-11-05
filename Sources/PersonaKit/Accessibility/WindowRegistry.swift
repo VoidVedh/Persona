@@ -97,9 +97,21 @@ public final class AXFocusTitleProvider: FocusTitleProvider {
 public final class SystemAXWindowProvider: AXWindowProvider {
     public var userFloatOverrides: Set<CGWindowID> = []
     public var configFloatApps: [String] = []
+    public var environmentProvider: () -> [String: String]
 
-    public init(configFloatApps: [String] = []) {
+    public init(
+        configFloatApps: [String] = [],
+        environmentProvider: @escaping () -> [String: String] = { ProcessInfo.processInfo.environment }
+    ) {
         self.configFloatApps = configFloatApps
+        self.environmentProvider = environmentProvider
+    }
+
+    public static func areWindowMovesBlocked(
+        env: [String: String] = ProcessInfo.processInfo.environment
+    ) -> Bool {
+        return (env["PERSONA_DRY_RUN"] == "1" || env["PERSONA_NO_WINDOW_MOVES"] == "1") &&
+            env["PERSONA_TILING_LIVE"] != "1"
     }
 
     public func getWindows(on screen: CGRect) -> [ManagedWindow] {
@@ -271,13 +283,11 @@ public final class SystemAXWindowProvider: AXWindowProvider {
     }
 
     public func setWindowFrame(window: ManagedWindow, frame: CGRect) -> Bool {
-        guard AXPermission.shared.isTrusted else { return false }
-
-        let env = ProcessInfo.processInfo.environment
-        if (env["PERSONA_DRY_RUN"] == "1" || env["PERSONA_PHASE1_DEMO"] != nil) &&
-           env["PERSONA_TILING_LIVE"] != "1" {
+        if Self.areWindowMovesBlocked(env: environmentProvider()) {
             return true
         }
+
+        guard AXPermission.shared.isTrusted else { return false }
 
         let targetElement: AXUIElement?
         if let el = window.element {

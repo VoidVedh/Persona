@@ -1,8 +1,7 @@
 #!/bin/bash
 # Performance budget check (§14):
-# - CPU (idle, ambient animation on): <= 4 % of one core
-# - RSS: <= 150 MB (153600 KB)
-# - Teardown / zero-trace clean
+# PersonaMode runs LIVE by default; this script exports PERSONA_DRY_RUN=1 so sampling
+# never mutates Dock/Menu Bar or moves user windows.
 set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"

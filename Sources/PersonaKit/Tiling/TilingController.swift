@@ -131,9 +131,12 @@ public final class TilingController {
         }
         guard !tilableWindows.isEmpty else { return }
 
-        // Record pre-tile frames before first layout
-        for win in tilableWindows {
-            journal.recordIfNeeded(window: win)
+        // Record pre-tile frames before first layout (skip if live window moves are gated)
+        let movesBlocked = (provider is SystemAXWindowProvider) && SystemAXWindowProvider.areWindowMovesBlocked()
+        if !movesBlocked {
+            for win in tilableWindows {
+                journal.recordIfNeeded(window: win)
+            }
         }
 
         let ids = tilableWindows.map { $0.id }

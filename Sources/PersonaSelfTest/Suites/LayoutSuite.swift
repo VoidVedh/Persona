@@ -324,5 +324,15 @@ public enum LayoutSuite {
 
         borderController.stop()
         t.expectEqual(borderController.borderWindows.count, 0, "borderController closes all windows on stop")
+
+        // Test 5: SystemAXWindowProvider window-move gate with PERSONA_NO_WINDOW_MOVES=1
+        let gatedSystemProvider = SystemAXWindowProvider(
+            environmentProvider: { ["PERSONA_NO_WINDOW_MOVES": "1"] }
+        )
+        let gatedResult = gatedSystemProvider.setWindowFrame(
+            window: validWin1,
+            frame: CGRect(x: 100, y: 100, width: 500, height: 400)
+        )
+        t.expect(gatedResult, "SystemAXWindowProvider.setWindowFrame returns true without calling AX when PERSONA_NO_WINDOW_MOVES=1")
     }
 }

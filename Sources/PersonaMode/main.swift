@@ -43,6 +43,12 @@ if args.count >= 3 && args[1] == "--probe" {
 }
 
 // GUI default mode
+let launchOptions = LaunchOptions.parse()
+launchOptions.applyToProcessEnvironment()
+for warning in launchOptions.deprecatedEnvWarnings {
+    fputs("warning: \(warning)\n", stderr)
+}
+
 let app = NSApplication.shared
 let delegate = AppDelegate()
 app.delegate = delegate

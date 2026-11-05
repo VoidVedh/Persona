@@ -13,7 +13,8 @@ let suites: [(name: String, run: (Harness) -> Void)] = [
     ("theme", ThemeSuite.run),
     ("telemetry", TelemetrySuite.run),
     ("layout", LayoutSuite.run),
-    ("fuzzy", FuzzySuite.run)
+    ("fuzzy", FuzzySuite.run),
+    ("launchoptions", LaunchOptionsSuite.run)
 ]
 
 let harness = Harness()

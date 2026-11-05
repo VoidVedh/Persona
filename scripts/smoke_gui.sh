@@ -1,5 +1,6 @@
 #!/bin/bash
-# Phase 2/3 GUI smoke test (DRY RUN — never mutates Dock/Menu Bar).
+# Phase 2/3 GUI smoke test (DRY RUN — never mutates Dock/Menu Bar or moves user windows;
+# PersonaMode runs LIVE by default, so automated scripts explicitly export PERSONA_DRY_RUN=1).
 # Launches the GUI, verifies the bar + overlay windows appear at the expected levels, quits via
 # SIGTERM, and verifies no windows or state remain.
 set -u

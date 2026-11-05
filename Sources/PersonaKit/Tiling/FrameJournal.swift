@@ -53,6 +53,10 @@ public final class FrameJournal {
     }
 
     public func restoreFrames(provider: AXWindowProvider, timeBudget: TimeInterval = 1.0) {
+        if (provider is SystemAXWindowProvider) && SystemAXWindowProvider.areWindowMovesBlocked() {
+            clear()
+            return
+        }
         let snapshot = queue.sync { Array(entries.values) }
         guard !snapshot.isEmpty else { return }
 

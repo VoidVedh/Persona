@@ -40,6 +40,7 @@ public final class AppState: ObservableObject {
     @Published public var hintMessage: String? = nil
     @Published public var axTrusted: Bool = false
     @Published public var tilingEnabled: Bool = true
+    @Published public var runMode: PersonaRunMode = .live
     @Published public var hotkeyErrors: [String] = []
     @Published public var configWarnings: [String] = []
 

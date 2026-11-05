@@ -35,6 +35,26 @@
 
 ---
 
+## Run Modes & CLI Flags
+
+`Persona Mode.app` and `PersonaMode` launch in **LIVE MODE by default**. Dry-run and frozen-window modes are explicit opt-ins for testing and development:
+
+| Mode | CLI | Env | System mutations (Dock/Menu Bar/wallpaper) | AX window moves | Terminal spawn | Typical user |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **LIVE (default)** | *(none)* | *(none)* | ✅ | ✅ (if AX trusted) | ✅ | double-click, `open` |
+| Dry-run | `--dry-run` | `PERSONA_DRY_RUN=1` | ❌ (DryRunAdapter prints) | ❌ | ❌ (`PERSONA_LAUNCH_TERMINAL_LIVE=1` overrides) | `smoke_gui`, `perf_check`, `e2e_tiling` |
+| Real mutations, frozen windows | `--no-window-moves` | `PERSONA_NO_WINDOW_MOVES=1` | ✅ | ❌ | ✅ | `verify_clean_state.sh` |
+| No guardian | `--no-guardian` | `PERSONA_NO_GUARDIAN=1` | per mode | per mode | per mode | `lldb` sessions |
+| Web inspector | `--debug-webui` | `PERSONA_WEBUI_DEBUG=1` | — | — | — | agent/dev |
+| `PERSONA_PHASE1_DEMO` | — | **deprecated**: ignored, one-line stderr warning | | | | |
+
+### First-Run Notes (Live Mode)
+- **Automation → System Events:** Prompted on first launch to hide the Dock and native Menu Bar without `killall Dock`. If denied, `RealSystemAdapter` falls back to `defaults write` + `killall Dock` for the Dock and skips native Menu Bar hiding (the Persona Top Bar at level `25` sits over it).
+- **Accessibility (`AXIsProcessTrusted`):** Grant manually in **System Settings → Privacy & Security → Accessibility** for automatic window tiling. Without Accessibility, the Active-Window Border falls back to `CGWindowListCopyWindowInfo` and the tiler logs a warning and no-ops.
+- **Panic / Immediate Exit:** Press `⌃⌥⌘Q`, click `EXIT P3R` in the Top Bar, choose `Return to macOS (Quit)` from the menu-bar crescent icon, or run `./scripts/restore_macos.sh`.
+
+---
+
 ## Default Hotkeys
 
 | Shortcut | Action |

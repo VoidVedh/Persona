@@ -59,7 +59,8 @@ public final class StatusBarController: NSObject, NSMenuDelegate {
     }
 
     private func populateMenu(_ m: NSMenu) {
-        let header = NSMenuItem(title: "Persona Mode — ACTIVE", action: nil, keyEquivalent: "")
+        let modeLabel = AppState.shared.runMode == .dryRun ? "DRY RUN" : "LIVE"
+        let header = NSMenuItem(title: "Persona Mode — \(modeLabel)", action: nil, keyEquivalent: "")
         header.isEnabled = false
         m.addItem(header)
 
